@@ -1,13 +1,1006 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MaxMetric — Аналитика и каталог каналов MAX</title>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%238b5cf6'/%3E%3Cstop offset='100%25' stop-color='%233b82f6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3Cpolyline points='6,22 12,14 18,18 26,8' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='26' cy='8' r='2' fill='white'/%3E%3C/svg%3E" />
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MaxMetric — Аналитика и каталог каналов MAX</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%238b5cf6'/%3E%3Cstop offset='100%25' stop-color='%233b82f6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3Cpolyline points='6,22 12,14 18,18 26,8' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='26' cy='8' r='2' fill='white'/%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f8fafc; --bg2: #ffffff; --bg3: #f1f5f9; --bg4: rgba(0,0,0,0.02);
+  --text: #0f172a; --text2: #334155; --text3: #64748b; --text4: #94a3b8;
+  --border: #e2e8f0; --border2: rgba(0,0,0,0.06);
+  --violet: #8b5cf6; --purple: #7c3aed; --blue: #3b82f6; --cyan: #06b6d4;
+  --emerald: #10b981; --amber: #f59e0b; --red: #ef4444; --pink: #ec4899;
+  --card-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06);
+}
+.dark {
+  --bg: #08081a; --bg2: rgba(255,255,255,0.03); --bg3: rgba(255,255,255,0.05); --bg4: rgba(255,255,255,0.02);
+  --text: #f1f5f9; --text2: #cbd5e1; --text3: #64748b; --text4: #475569;
+  --border: rgba(255,255,255,0.06); --border2: rgba(255,255,255,0.03);
+  --card-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+body { font-family:'Inter',system-ui,-apple-system,sans-serif; background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased; transition:background-color .3s,color .3s; overflow-x:hidden; }
+a { text-decoration:none; color:inherit; }
+button { cursor:pointer; border:none; background:none; font-family:inherit; }
+input,select,textarea { font-family:inherit; }
+::-webkit-scrollbar { width:6px; height:6px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:rgba(139,92,246,.3); border-radius:3px; }
+
+/* Animations */
+@keyframes fadeIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+@keyframes slideIn { from{opacity:0;transform:translateX(-10px)} to{opacity:1;transform:translateX(0)} }
+@keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
+@keyframes progress { from{width:0} to{width:100%} }
+@keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+.fade-in { animation:fadeIn .4s ease-out forwards; }
+.slide-in { animation:slideIn .3s ease-out forwards; }
+
+/* Layout */
+.container { max-width:1280px; margin:0 auto; padding:0 16px; }
+@media(min-width:640px) { .container { padding:0 24px; } }
+
+/* Header */
+.header { position:sticky; top:0; z-index:50; backdrop-filter:blur(20px); background:rgba(255,255,255,.8); border-bottom:1px solid var(--border); transition:all .3s; }
+.dark .header { background:rgba(10,10,26,.8); }
+.header-inner { display:flex; align-items:center; justify-content:space-between; height:60px; }
+.logo { display:flex; align-items:center; gap:10px; cursor:pointer; }
+.logo:hover .logo-icon { transform:scale(1.05); }
+.logo-icon { transition:transform .3s; }
+.logo-text { font-size:18px; font-weight:800; }
+.logo-text span { background:linear-gradient(135deg,#8b5cf6,#3b82f6); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.logo-sub { font-size:10px; color:var(--text3); margin-top:-2px; display:none; }
+@media(min-width:640px) { .logo-sub { display:block; } }
+.header-nav { display:none; align-items:center; gap:4px; }
+@media(min-width:1024px) { .header-nav { display:flex; } }
+.nav-btn { display:flex; align-items:center; gap:6px; padding:8px 12px; border-radius:10px; font-size:13px; color:var(--text3); transition:all .2s; position:relative; }
+.nav-btn:hover { color:var(--violet); background:rgba(139,92,246,.05); }
+.nav-badge { position:absolute; top:-2px; right:-2px; min-width:16px; height:16px; border-radius:8px; font-size:9px; font-weight:700; display:flex; align-items:center; justify-content:center; color:#fff; padding:0 4px; }
+.nav-badge.violet { background:var(--violet); }
+.nav-badge.pink { background:var(--pink); }
+.header-search { display:none; flex:1; max-width:260px; margin:0 16px; position:relative; }
+@media(min-width:768px) { .header-search { display:flex; } }
+.header-search input { width:100%; padding:8px 16px 8px 36px; border-radius:12px; background:var(--bg3); border:1px solid var(--border); font-size:13px; color:var(--text); outline:none; transition:all .2s; }
+.header-search input:focus { border-color:rgba(139,92,246,.5); box-shadow:0 0 0 3px rgba(139,92,246,.1); }
+.header-search input::placeholder { color:var(--text4); }
+.header-search svg { position:absolute; left:10px; top:50%; transform:translateY(-50%); color:var(--text4); }
+.header-actions { display:flex; align-items:center; gap:6px; }
+.icon-btn { padding:8px; border-radius:12px; background:var(--bg3); border:1px solid var(--border); color:var(--text3); transition:all .2s; position:relative; display:flex; align-items:center; justify-content:center; }
+.icon-btn:hover { color:var(--violet); border-color:rgba(139,92,246,.3); }
+.add-btn { display:none; align-items:center; gap:6px; padding:8px 16px; border-radius:12px; background:linear-gradient(135deg,#7c3aed,#3b82f6); color:#fff; font-size:13px; font-weight:600; transition:all .3s; }
+@media(min-width:640px) { .add-btn { display:flex; } }
+.add-btn:hover { box-shadow:0 8px 25px rgba(139,92,246,.3); transform:scale(1.03); }
+.notif-dot { position:absolute; top:-2px; right:-2px; width:16px; height:16px; border-radius:8px; background:var(--red); color:#fff; font-size:9px; font-weight:700; display:flex; align-items:center; justify-content:center; }
+
+/* Notification dropdown */
+.notif-dropdown { position:absolute; right:0; top:calc(100% + 8px); width:320px; border-radius:16px; background:var(--bg2); border:1px solid var(--border); box-shadow:0 20px 60px rgba(0,0,0,.15); overflow:hidden; z-index:100; }
+.dark .notif-dropdown { background:#12122a; box-shadow:0 20px 60px rgba(0,0,0,.5); }
+.notif-header { padding:12px 16px; border-bottom:1px solid var(--border2); display:flex; align-items:center; justify-content:between; }
+.notif-item { padding:12px 16px; border-bottom:1px solid var(--border2); display:flex; gap:10px; transition:background .15s; cursor:pointer; }
+.notif-item:hover { background:var(--bg3); }
+.notif-item.unread { background:rgba(139,92,246,.03); }
+.dark .notif-item.unread { background:rgba(139,92,246,.05); }
+
+/* Hero */
+.hero { position:relative; border-radius:24px; overflow:hidden; margin-bottom:32px; }
+.hero-bg { position:absolute; inset:0; background:linear-gradient(135deg,#7c3aed,#6d28d9,#3b82f6); }
+.hero-pattern { position:absolute; inset:0; background-image:radial-gradient(rgba(255,255,255,.08) 1px,transparent 1px); background-size:20px 20px; }
+.hero-deco1 { position:absolute; top:-80px; right:-80px; width:200px; height:200px; border-radius:50%; background:rgba(255,255,255,.05); filter:blur(40px); }
+.hero-deco2 { position:absolute; bottom:-40px; left:-40px; width:150px; height:150px; border-radius:50%; background:rgba(255,255,255,.05); filter:blur(40px); }
+.hero-content { position:relative; padding:40px 24px; text-align:center; }
+@media(min-width:640px) { .hero-content { padding:56px 40px; } }
+.hero-badge { display:inline-flex; align-items:center; gap:6px; padding:4px 12px; border-radius:20px; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.2); font-size:11px; color:rgba(255,255,255,.8); margin-bottom:20px; backdrop-filter:blur(8px); }
+.hero h2 { font-size:28px; font-weight:800; color:#fff; margin-bottom:8px; line-height:1.2; }
+@media(min-width:640px) { .hero h2 { font-size:40px; } }
+.hero h2 span { background:linear-gradient(90deg,#67e8f9,#c4b5fd,#93c5fd); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.hero p { color:rgba(255,255,255,.6); font-size:14px; margin-bottom:32px; max-width:500px; margin-left:auto; margin-right:auto; }
+.hero-search { position:relative; max-width:560px; margin:0 auto 20px; }
+.hero-search input { width:100%; padding:16px 20px 16px 48px; border-radius:16px; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.2); color:#fff; font-size:14px; outline:none; backdrop-filter:blur(8px); transition:all .2s; }
+.hero-search input::placeholder { color:rgba(255,255,255,.4); }
+.hero-search input:focus { background:rgba(255,255,255,.15); border-color:rgba(255,255,255,.3); box-shadow:0 0 0 4px rgba(255,255,255,.1); }
+.hero-search svg { position:absolute; left:16px; top:50%; transform:translateY(-50%); color:rgba(255,255,255,.4); }
+.hero-tags { display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin-bottom:24px; }
+.hero-tag { padding:6px 14px; border-radius:20px; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.1); color:rgba(255,255,255,.7); font-size:12px; transition:all .2s; cursor:pointer; display:flex; align-items:center; gap:5px; }
+.hero-tag:hover { background:rgba(255,255,255,.2); color:#fff; }
+.hero-actions { display:flex; flex-wrap:wrap; justify-content:center; gap:10px; }
+.hero-action-btn { display:flex; align-items:center; gap:8px; padding:10px 20px; border-radius:12px; font-size:13px; font-weight:600; transition:all .2s; }
+.hero-action-btn.glass { background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.2); color:#fff; backdrop-filter:blur(8px); }
+.hero-action-btn.glass:hover { background:rgba(255,255,255,.25); }
+.hero-action-btn.solid { background:#fff; color:#7c3aed; }
+.hero-action-btn.solid:hover { box-shadow:0 8px 25px rgba(0,0,0,.15); }
+
+/* Stats Bar */
+.stats-bar { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-bottom:32px; }
+@media(min-width:640px) { .stats-bar { grid-template-columns:repeat(3,1fr); } }
+@media(min-width:1024px) { .stats-bar { grid-template-columns:repeat(6,1fr); } }
+.stat-card { position:relative; border-radius:16px; background:var(--bg2); border:1px solid var(--border); padding:16px; overflow:hidden; transition:all .3s; }
+.stat-card:hover { border-color:rgba(139,92,246,.2); }
+.stat-card .deco { position:absolute; top:0; right:0; width:60px; height:60px; border-bottom-left-radius:32px; opacity:.06; transition:opacity .3s; }
+.stat-card:hover .deco { opacity:.12; }
+.stat-icon { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; color:#fff; margin-bottom:12px; box-shadow:0 4px 12px rgba(0,0,0,.15); }
+.stat-val { font-size:20px; font-weight:800; color:var(--text); }
+.stat-label { font-size:10px; color:var(--text4); margin-top:2px; }
+
+/* Card */
+.card { border-radius:16px; background:var(--bg2); border:1px solid var(--border); box-shadow:var(--card-shadow); transition:all .3s; overflow:hidden; }
+.card:hover { border-color:rgba(139,92,246,.3); box-shadow:0 10px 40px rgba(139,92,246,.07); transform:translateY(-2px); }
+
+/* Top Cards */
+.top-grid { display:grid; grid-template-columns:1fr; gap:16px; margin-bottom:32px; }
+@media(min-width:768px) { .top-grid { grid-template-columns:repeat(3,1fr); } }
+.top-card-header { padding:14px 20px; display:flex; align-items:center; justify-content:space-between; }
+.top-card-header h3 { display:flex; align-items:center; gap:8px; color:#fff; font-size:14px; font-weight:600; }
+.top-card-header .icon-wrap { width:28px; height:28px; border-radius:8px; background:rgba(255,255,255,.2); display:flex; align-items:center; justify-content:center; }
+.top-item { display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:12px; transition:background .15s; cursor:pointer; }
+.top-item:hover { background:var(--bg3); }
+.top-rank { width:24px; height:24px; border-radius:7px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; flex-shrink:0; }
+.top-avatar { width:32px; height:32px; border-radius:10px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:12px; font-weight:700; flex-shrink:0; }
+.top-info { flex:1; min-width:0; }
+.top-name { font-size:13px; font-weight:600; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; transition:color .2s; }
+.top-item:hover .top-name { color:var(--violet); }
+.top-username { font-size:10px; color:var(--text4); }
+.top-val { font-size:13px; font-weight:700; flex-shrink:0; }
+.top-view-all { display:block; width:calc(100% - 24px); margin:0 12px 12px; padding:10px; border-radius:12px; background:var(--bg3); text-align:center; font-size:13px; font-weight:500; color:var(--text3); transition:all .2s; }
+.top-view-all:hover { color:var(--violet); background:rgba(139,92,246,.05); }
+
+/* Category sidebar */
+.main-layout { display:flex; gap:24px; }
+.sidebar { display:none; width:240px; flex-shrink:0; }
+@media(min-width:1024px) { .sidebar { display:block; } }
+.sidebar-inner { position:sticky; top:84px; border-radius:16px; background:var(--bg2); border:1px solid var(--border); padding:12px; }
+.sidebar-title { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--text4); padding:4px 12px; margin-bottom:4px; }
+.cat-btn { display:flex; align-items:center; gap:10px; width:100%; padding:10px 12px; border-radius:12px; font-size:13px; color:var(--text3); transition:all .2s; text-align:left; border:1px solid transparent; }
+.cat-btn:hover { background:var(--bg3); color:var(--text); }
+.cat-btn.active { background:rgba(139,92,246,.08); color:var(--violet); font-weight:600; border-color:rgba(139,92,246,.15); }
+.cat-btn .count { margin-left:auto; font-size:11px; padding:2px 8px; border-radius:10px; background:var(--bg3); color:var(--text4); }
+.cat-btn.active .count { background:rgba(139,92,246,.15); color:var(--violet); }
+.content-area { flex:1; min-width:0; }
+
+/* Mobile categories */
+.mobile-cats { display:flex; overflow-x:auto; gap:8px; margin-bottom:24px; padding-bottom:4px; -ms-overflow-style:none; scrollbar-width:none; }
+.mobile-cats::-webkit-scrollbar { display:none; }
+@media(min-width:1024px) { .mobile-cats { display:none; } }
+.mcat-btn { white-space:nowrap; padding:8px 14px; border-radius:12px; font-size:12px; font-weight:500; background:var(--bg3); border:1px solid transparent; color:var(--text3); transition:all .2s; display:flex; align-items:center; gap:6px; }
+.mcat-btn.active { background:rgba(139,92,246,.08); color:var(--violet); border-color:rgba(139,92,246,.15); }
+
+/* Sort tabs */
+.sort-bar { border-radius:16px; background:var(--bg2); border:1px solid var(--border); padding:14px 16px; margin-bottom:20px; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; }
+.sort-group { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.sort-icon { width:32px; height:32px; border-radius:8px; background:var(--bg3); display:flex; align-items:center; justify-content:center; color:var(--text4); }
+.sort-pills { display:flex; background:var(--bg3); border-radius:12px; padding:3px; border:1px solid var(--border); }
+.sort-pill { padding:7px 14px; border-radius:9px; font-size:12px; font-weight:500; color:var(--text3); transition:all .2s; display:flex; align-items:center; gap:5px; }
+.sort-pill.active { background:var(--bg2); color:var(--violet); box-shadow:0 1px 3px rgba(0,0,0,.08); }
+.dark .sort-pill.active { background:rgba(139,92,246,.2); }
+.period-pills { display:none; }
+.period-pills.show { display:flex; }
+.period-pill { padding:7px 12px; border-radius:9px; font-size:12px; font-weight:500; color:var(--text3); transition:all .2s; }
+.period-pill.active { background:var(--bg2); color:var(--emerald); box-shadow:0 1px 3px rgba(0,0,0,.08); }
+.dark .period-pill.active { background:rgba(16,185,129,.15); }
+.verified-btn { display:flex; align-items:center; gap:6px; padding:7px 12px; border-radius:12px; font-size:12px; font-weight:500; border:1px solid var(--border); background:var(--bg3); color:var(--text3); transition:all .2s; }
+.verified-btn.active { background:rgba(59,130,246,.08); color:var(--blue); border-color:rgba(59,130,246,.2); }
+
+/* Results info */
+.results-info { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; font-size:13px; color:var(--text3); }
+.results-info strong { color:var(--text); font-weight:700; }
+.reset-btn { font-size:12px; color:var(--violet); transition:color .2s; }
+.reset-btn:hover { color:var(--purple); }
+
+/* Channel Cards Grid */
+.channel-grid { display:grid; grid-template-columns:1fr; gap:16px; }
+@media(min-width:768px) { .channel-grid { grid-template-columns:repeat(2,1fr); } }
+.ch-card { position:relative; border-radius:16px; background:var(--bg2); border:1px solid var(--border); padding:20px; transition:all .3s; cursor:pointer; }
+.ch-card:hover { border-color:rgba(139,92,246,.3); box-shadow:0 10px 40px rgba(139,92,246,.07); transform:translateY(-2px); }
+.ch-rank { position:absolute; top:-10px; left:-10px; width:28px; height:28px; border-radius:8px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:11px; font-weight:700; box-shadow:0 4px 12px rgba(0,0,0,.2); z-index:2; }
+.ch-actions { position:absolute; top:12px; right:12px; display:flex; gap:4px; opacity:0; transition:opacity .2s; z-index:2; }
+.ch-card:hover .ch-actions { opacity:1; }
+.ch-act-btn { padding:6px; border-radius:8px; background:var(--bg3); color:var(--text4); transition:all .2s; display:flex; align-items:center; justify-content:center; }
+.ch-act-btn:hover { color:var(--violet); }
+.ch-act-btn.fav-active { background:rgba(236,72,153,.1); color:var(--pink); }
+.ch-act-btn.cmp-active { background:rgba(139,92,246,.1); color:var(--violet); }
+.ch-top { display:flex; gap:14px; }
+.ch-avatar { width:52px; height:52px; border-radius:14px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:20px; font-weight:700; flex-shrink:0; }
+.ch-info { flex:1; min-width:0; }
+.ch-name-row { display:flex; align-items:center; gap:6px; margin-bottom:2px; }
+.ch-name { font-size:15px; font-weight:700; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; transition:color .2s; }
+.ch-card:hover .ch-name { color:var(--violet); }
+.ch-verified { color:var(--blue); flex-shrink:0; }
+.ch-username { font-size:12px; color:var(--violet); margin-bottom:6px; }
+.ch-desc { font-size:12px; color:var(--text3); line-height:1.5; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.ch-tags { display:flex; flex-wrap:wrap; gap:4px; margin-top:10px; }
+.ch-tag { font-size:10px; padding:2px 8px; border-radius:10px; background:var(--bg3); color:var(--text4); }
+.ch-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:12px; padding-top:12px; border-top:1px solid var(--border2); text-align:center; }
+.ch-stat-val { display:flex; align-items:center; justify-content:center; gap:5px; font-size:13px; font-weight:700; margin-bottom:2px; }
+.ch-stat-label { font-size:10px; color:var(--text4); }
+.ch-er-row { display:flex; align-items:center; justify-content:space-between; margin-top:10px; }
+.ch-er { font-size:10px; padding:4px 10px; border-radius:10px; background:rgba(139,92,246,.08); color:var(--violet); font-weight:600; }
+.ch-posts { font-size:10px; padding:4px 10px; border-radius:10px; background:var(--bg3); color:var(--text4); }
+
+/* Sparkline */
+.sparkline { display:flex; align-items:center; justify-content:space-between; margin-top:10px; }
+.sparkline span { font-size:10px; color:var(--text4); }
+
+/* Empty state */
+.empty-state { text-align:center; padding:60px 20px; }
+.empty-icon { width:64px; height:64px; border-radius:16px; background:var(--bg3); display:flex; align-items:center; justify-content:center; margin:0 auto 16px; font-size:28px; }
+.empty-title { font-size:18px; font-weight:700; color:var(--text); margin-bottom:8px; }
+.empty-desc { font-size:13px; color:var(--text3); margin-bottom:16px; }
+.primary-btn { padding:10px 24px; border-radius:12px; background:linear-gradient(135deg,#7c3aed,#3b82f6); color:#fff; font-size:13px; font-weight:600; transition:all .3s; }
+.primary-btn:hover { box-shadow:0 8px 25px rgba(139,92,246,.3); transform:scale(1.03); }
+
+/* Channel Detail Page */
+.detail-bar { position:sticky; top:60px; z-index:40; backdrop-filter:blur(20px); background:rgba(255,255,255,.8); border-bottom:1px solid var(--border); }
+.dark .detail-bar { background:rgba(8,8,26,.8); }
+.detail-bar-inner { display:flex; align-items:center; justify-content:space-between; padding:10px 0; }
+.back-btn { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text3); transition:color .2s; }
+.back-btn:hover { color:var(--violet); }
+.detail-actions { display:flex; align-items:center; gap:6px; }
+
+/* Channel header card */
+.ch-header-card { border-radius:24px; background:var(--bg2); border:1px solid var(--border); overflow:hidden; margin-bottom:24px; }
+.ch-banner { height:100px; position:relative; overflow:hidden; }
+@media(min-width:640px) { .ch-banner { height:130px; } }
+.ch-header-body { padding:0 20px 24px; margin-top:-40px; position:relative; }
+@media(min-width:640px) { .ch-header-body { padding:0 32px 24px; margin-top:-48px; } }
+.ch-header-top { display:flex; flex-direction:column; gap:16px; }
+@media(min-width:640px) { .ch-header-top { flex-direction:row; gap:20px; } }
+.ch-big-avatar { width:80px; height:80px; border-radius:16px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:32px; font-weight:800; box-shadow:0 8px 24px rgba(0,0,0,.2); border:4px solid var(--bg2); flex-shrink:0; }
+@media(min-width:640px) { .ch-big-avatar { width:96px; height:96px; font-size:38px; } }
+.ch-header-info { padding-top:8px; }
+@media(min-width:640px) { .ch-header-info { padding-top:16px; } }
+.ch-big-name { font-size:22px; font-weight:800; color:var(--text); display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.ch-big-username { font-size:14px; color:var(--violet); margin-top:2px; }
+.ch-full-desc { font-size:13px; color:var(--text2); line-height:1.6; margin-top:12px; max-width:700px; }
+.ch-rankings { display:flex; flex-wrap:wrap; gap:6px; margin-top:12px; }
+.ch-ranking-badge { font-size:10px; padding:4px 10px; border-radius:10px; font-weight:600; display:inline-flex; align-items:center; gap:4px; }
+.ch-detail-tags { display:flex; flex-wrap:wrap; gap:6px; margin-top:12px; }
+.ch-detail-tag { font-size:11px; padding:4px 10px; border-radius:10px; background:var(--bg3); color:var(--text3); transition:color .2s; cursor:pointer; }
+.ch-detail-tag:hover { color:var(--violet); }
+.ch-meta-row { display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; }
+.ch-meta-item { display:flex; align-items:center; gap:5px; padding:6px 12px; border-radius:8px; background:var(--bg3); font-size:11px; color:var(--text3); }
+.ch-meta-item.link { background:rgba(139,92,246,.08); color:var(--violet); transition:background .2s; cursor:pointer; }
+.ch-meta-item.link:hover { background:rgba(139,92,246,.15); }
+
+/* Detail stats grid */
+.detail-stats { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-bottom:24px; }
+@media(min-width:640px) { .detail-stats { grid-template-columns:repeat(3,1fr); } }
+@media(min-width:1024px) { .detail-stats { grid-template-columns:repeat(6,1fr); } }
+
+/* Chart container */
+.chart-card { border-radius:16px; background:var(--bg2); border:1px solid var(--border); overflow:hidden; margin-bottom:24px; }
+.chart-header { padding:16px 20px; border-bottom:1px solid var(--border2); display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; }
+.chart-title { font-size:14px; font-weight:700; color:var(--text); }
+.chart-value { font-size:18px; font-weight:800; color:var(--text); margin-top:4px; }
+.chart-change { font-size:11px; padding:2px 8px; border-radius:10px; font-weight:600; margin-left:8px; }
+.chart-change.up { background:rgba(16,185,129,.1); color:var(--emerald); }
+.chart-change.down { background:rgba(239,68,68,.1); color:var(--red); }
+.chart-body { padding:20px; position:relative; }
+.chart-svg { width:100%; }
+.chart-tooltip { position:absolute; pointer-events:none; background:#0f172a; color:#fff; padding:6px 12px; border-radius:8px; font-size:11px; z-index:10; box-shadow:0 8px 20px rgba(0,0,0,.2); }
+.dark .chart-tooltip { background:#fff; color:#0f172a; }
+.chart-dates { display:flex; justify-content:space-between; margin-top:8px; padding:0 4px; font-size:10px; color:var(--text4); }
+.chart-periods { display:flex; background:var(--bg3); border-radius:10px; padding:3px; border:1px solid var(--border); }
+.chart-period-btn { padding:5px 12px; border-radius:7px; font-size:11px; font-weight:500; color:var(--text3); transition:all .2s; }
+.chart-period-btn.active { background:var(--bg2); color:var(--text); box-shadow:0 1px 3px rgba(0,0,0,.08); }
+.dark .chart-period-btn.active { background:rgba(255,255,255,.1); }
+
+/* Charts grid */
+.charts-grid { display:grid; grid-template-columns:1fr; gap:16px; margin-bottom:24px; }
+@media(min-width:1024px) { .charts-grid { grid-template-columns:repeat(2,1fr); } }
+
+/* Table */
+.data-table { width:100%; border-collapse:collapse; }
+.data-table th { text-align:left; padding:12px 20px; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.5px; color:var(--text4); border-bottom:1px solid var(--border2); }
+.data-table th.right { text-align:right; }
+.data-table td { padding:12px 20px; font-size:13px; border-bottom:1px solid var(--border2); }
+.data-table td.right { text-align:right; }
+.data-table tr:hover { background:var(--bg3); }
+.data-table tr.today { background:rgba(139,92,246,.03); }
+.dark .data-table tr.today { background:rgba(139,92,246,.05); }
+.today-badge { font-size:9px; padding:2px 6px; border-radius:6px; background:rgba(139,92,246,.1); color:var(--violet); margin-left:6px; font-weight:600; }
+
+/* Related */
+.related-section { margin-bottom:32px; }
+.related-title { font-size:18px; font-weight:700; color:var(--text); margin-bottom:16px; }
+
+/* Top Page */
+.top-page-title { text-align:center; margin-bottom:24px; padding-top:8px; }
+.top-page-title h1 { font-size:28px; font-weight:800; color:var(--text); margin-bottom:4px; }
+.top-page-title p { font-size:13px; color:var(--text3); }
+.top-table-card { border-radius:16px; background:var(--bg2); border:1px solid var(--border); overflow:hidden; max-width:960px; margin:0 auto; }
+.top-table tr.gold { background:linear-gradient(90deg,rgba(251,191,36,.05),transparent); }
+.dark .top-table tr.gold { background:linear-gradient(90deg,rgba(251,191,36,.03),transparent); }
+.top-table-rank { width:28px; height:28px; border-radius:8px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:11px; font-weight:700; box-shadow:0 2px 8px rgba(0,0,0,.15); }
+.top-table-avatar { width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:14px; font-weight:700; flex-shrink:0; }
+.top-table-name { font-size:13px; font-weight:600; color:var(--text); transition:color .2s; }
+.top-table tr:hover .top-table-name { color:var(--violet); }
+.top-table-username { font-size:10px; color:var(--text4); }
+.er-badge { font-size:11px; padding:3px 8px; border-radius:8px; font-weight:500; }
+.er-badge.high { background:rgba(16,185,129,.1); color:var(--emerald); }
+.er-badge.mid { background:rgba(59,130,246,.1); color:var(--blue); }
+.er-badge.low { background:var(--bg3); color:var(--text3); }
+
+/* Compare page */
+.compare-table { width:100%; border-collapse:collapse; }
+.compare-table th { padding:16px 20px; text-align:center; border-bottom:1px solid var(--border2); min-width:160px; }
+.compare-table th:first-child { min-width:140px; text-align:left; }
+.compare-table td { padding:12px 20px; text-align:center; border-bottom:1px solid var(--border2); }
+.compare-table td:first-child { text-align:left; }
+.compare-table tr:hover { background:var(--bg3); }
+.compare-avatar { width:48px; height:48px; border-radius:12px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:18px; font-weight:700; cursor:pointer; transition:transform .2s; margin:0 auto; position:relative; }
+.compare-avatar:hover { transform:scale(1.1); }
+.compare-remove { position:absolute; top:-6px; right:-6px; width:18px; height:18px; border-radius:9px; background:var(--red); color:#fff; font-size:10px; display:flex; align-items:center; justify-content:center; }
+.best-badge { font-size:9px; padding:2px 6px; border-radius:6px; background:rgba(16,185,129,.1); color:var(--emerald); font-weight:600; margin-left:6px; }
+.metric-cell { display:flex; align-items:center; gap:6px; }
+
+/* Favorites page */
+.fav-empty { min-height:50vh; display:flex; align-items:center; justify-content:center; }
+.fav-empty-icon { width:80px; height:80px; border-radius:24px; display:flex; align-items:center; justify-content:center; margin:0 auto 16px; }
+
+/* Recently viewed */
+.recent-section { margin-bottom:32px; }
+.recent-title { display:flex; align-items:center; gap:8px; font-size:14px; font-weight:600; color:var(--text); margin-bottom:12px; }
+.recent-scroll { display:flex; gap:10px; overflow-x:auto; padding-bottom:8px; -ms-overflow-style:none; scrollbar-width:none; }
+.recent-scroll::-webkit-scrollbar { display:none; }
+.recent-card { display:flex; align-items:center; gap:10px; padding:10px 16px; border-radius:12px; background:var(--bg2); border:1px solid var(--border); min-width:200px; cursor:pointer; transition:all .2s; flex-shrink:0; }
+.recent-card:hover { border-color:rgba(139,92,246,.3); }
+.recent-avatar { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:13px; font-weight:700; flex-shrink:0; }
+.recent-name { font-size:13px; font-weight:600; color:var(--text); white-space:nowrap; transition:color .2s; }
+.recent-card:hover .recent-name { color:var(--violet); }
+.recent-subs { font-size:10px; color:var(--text4); }
+
+/* Footer */
+.footer { border-top:1px solid var(--border); margin-top:64px; background:var(--bg4); }
+.footer-inner { padding:48px 0; display:grid; grid-template-columns:1fr; gap:32px; }
+@media(min-width:768px) { .footer-inner { grid-template-columns:1fr 1fr 1fr 1fr; } }
+.footer-brand p { font-size:13px; color:var(--text3); line-height:1.6; margin-top:12px; }
+.footer-col h4 { font-size:13px; font-weight:700; color:var(--text); margin-bottom:12px; }
+.footer-col button { display:block; font-size:13px; color:var(--text3); padding:3px 0; transition:color .2s; }
+.footer-col button:hover { color:var(--violet); }
+.footer-bottom { padding:20px 0; border-top:1px solid var(--border); display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px; font-size:11px; color:var(--text4); }
+
+/* Mobile bottom nav */
+.bottom-nav { display:flex; position:fixed; bottom:0; left:0; right:0; z-index:50; background:rgba(255,255,255,.92); backdrop-filter:blur(20px); border-top:1px solid var(--border); height:56px; align-items:center; justify-content:space-around; padding:0 8px; }
+.dark .bottom-nav { background:rgba(10,10,26,.92); }
+@media(min-width:1024px) { .bottom-nav { display:none; } }
+.bnav-btn { display:flex; flex-direction:column; align-items:center; gap:2px; padding:4px 8px; color:var(--text4); transition:color .2s; position:relative; }
+.bnav-btn:hover { color:var(--violet); }
+.bnav-btn span { font-size:10px; }
+.bnav-center { width:48px; height:48px; border-radius:16px; background:linear-gradient(135deg,#7c3aed,#3b82f6); color:#fff; display:flex; align-items:center; justify-content:center; margin-top:-16px; box-shadow:0 4px 16px rgba(139,92,246,.3); transition:transform .2s; }
+.bnav-center:hover { transform:scale(1.1); }
+.bnav-badge { position:absolute; top:-2px; right:0; min-width:14px; height:14px; border-radius:7px; font-size:8px; font-weight:700; display:flex; align-items:center; justify-content:center; color:#fff; padding:0 3px; }
+
+/* Modal */
+.modal-overlay { position:fixed; inset:0; z-index:100; display:flex; align-items:center; justify-content:center; padding:16px; }
+.modal-backdrop { position:absolute; inset:0; background:rgba(0,0,0,.6); backdrop-filter:blur(4px); }
+.modal-content { position:relative; width:100%; max-width:480px; border-radius:24px; background:var(--bg2); border:1px solid var(--border); box-shadow:0 24px 80px rgba(0,0,0,.2); max-height:90vh; overflow-y:auto; }
+.dark .modal-content { background:#12122a; }
+.modal-bar { height:5px; background:linear-gradient(90deg,#3b82f6,#8b5cf6,#7c3aed); border-radius:24px 24px 0 0; }
+.modal-body { padding:24px; }
+.modal-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; }
+.modal-title { font-size:20px; font-weight:800; color:var(--text); }
+.modal-subtitle { font-size:13px; color:var(--text3); margin-top:2px; }
+.form-group { margin-bottom:16px; }
+.form-label { display:block; font-size:13px; font-weight:600; color:var(--text2); margin-bottom:6px; }
+.form-label .req { color:var(--red); }
+.form-input { width:100%; padding:12px 16px; border-radius:12px; background:var(--bg3); border:1px solid var(--border); font-size:13px; color:var(--text); outline:none; transition:all .2s; }
+.form-input:focus { border-color:rgba(139,92,246,.5); box-shadow:0 0 0 3px rgba(139,92,246,.1); }
+.form-input.error { border-color:var(--red); }
+.form-error { font-size:11px; color:var(--red); margin-top:4px; display:flex; align-items:center; gap:4px; }
+.form-select { width:100%; padding:12px 16px; border-radius:12px; background:var(--bg3); border:1px solid var(--border); font-size:13px; color:var(--text); outline:none; appearance:auto; }
+.form-textarea { width:100%; padding:12px 16px; border-radius:12px; background:var(--bg3); border:1px solid var(--border); font-size:13px; color:var(--text); outline:none; resize:none; min-height:100px; transition:all .2s; }
+.form-textarea:focus { border-color:rgba(139,92,246,.5); box-shadow:0 0 0 3px rgba(139,92,246,.1); }
+.form-note { padding:12px 16px; border-radius:12px; background:var(--bg3); border:1px solid var(--border2); font-size:11px; color:var(--text3); line-height:1.5; margin-bottom:16px; }
+.submit-btn { width:100%; padding:14px; border-radius:12px; background:linear-gradient(135deg,#3b82f6,#8b5cf6,#7c3aed); color:#fff; font-size:14px; font-weight:600; transition:all .3s; }
+.submit-btn:hover { box-shadow:0 8px 25px rgba(139,92,246,.3); transform:scale(1.02); }
+
+/* Share modal */
+.share-link-row { display:flex; align-items:center; gap:8px; padding:12px; border-radius:12px; background:var(--bg3); border:1px solid var(--border); }
+.share-link-row input { flex:1; background:transparent; border:none; font-size:13px; color:var(--text); outline:none; }
+.share-copy-btn { padding:8px; border-radius:8px; background:rgba(139,92,246,.1); color:var(--violet); transition:all .2s; display:flex; align-items:center; justify-content:center; }
+.share-copy-btn.copied { background:rgba(16,185,129,.1); color:var(--emerald); }
+.copy-msg { text-align:center; font-size:12px; color:var(--emerald); margin-top:8px; }
+
+/* Success state */
+.success-state { text-align:center; padding:40px 0; }
+.success-icon { width:64px; height:64px; border-radius:16px; display:flex; align-items:center; justify-content:center; margin:0 auto 16px; box-shadow:0 8px 24px rgba(16,185,129,.25); }
+.progress-bar { height:5px; background:var(--bg3); border-radius:3px; overflow:hidden; margin-top:24px; }
+.progress-fill { height:100%; background:linear-gradient(90deg,#10b981,#14b8a6); border-radius:3px; animation:progress 2.5s ease forwards; }
+
+/* Gradient backgrounds */
+.grad-violet { background:linear-gradient(135deg,#8b5cf6,#7c3aed); }
+.grad-blue { background:linear-gradient(135deg,#3b82f6,#06b6d4); }
+.grad-emerald { background:linear-gradient(135deg,#10b981,#14b8a6); }
+.grad-amber { background:linear-gradient(135deg,#f59e0b,#ef4444); }
+.grad-pink { background:linear-gradient(135deg,#ec4899,#f43f5e); }
+.grad-indigo { background:linear-gradient(135deg,#6366f1,#3b82f6); }
+.grad-teal { background:linear-gradient(135deg,#14b8a6,#22c55e); }
+.grad-orange { background:linear-gradient(135deg,#f97316,#ef4444); }
+.grad-red { background:linear-gradient(135deg,#ef4444,#ec4899); }
+.grad-cyan { background:linear-gradient(135deg,#06b6d4,#3b82f6); }
+
+/* Hidden class */
+.hidden { display:none !important; }
+
+/* Padding for bottom nav on mobile */
+@media(max-width:1023px) {
+  .main-content { padding-bottom:70px; }
+}
+
+/* SVG icons inline */
+.icon { width:16px; height:16px; display:inline-block; vertical-align:middle; }
+.icon-sm { width:14px; height:14px; }
+.icon-xs { width:12px; height:12px; }
+.icon-lg { width:20px; height:20px; }
+
+/* Mini chart SVG in cards */
+.mini-chart { flex-shrink:0; }
+
+/* Responsive table scroll */
+.table-scroll { overflow-x:auto; }
+
+/* Dark select fix */
+.dark select option { background:#1a1a3a; color:#fff; }
+
+/* Pulse animation for notifications */
+@keyframes pulseDot { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.3);opacity:.8} }
+.pulse-dot { animation:pulseDot 2s ease-in-out infinite; }
+</style>
+</head>
+<body class="dark">
+<div id="app"></div>
+<script type="module" src="/src/main.tsx"></script>
+<script>
+// ========== DATA ==========
+const avatarGrads = [
+  'grad-violet','grad-blue','grad-emerald','grad-orange','grad-pink',
+  'grad-indigo','grad-amber','grad-teal','grad-red','grad-cyan'
+];
+const categories = [
+  {id:'all',name:'Все каналы',icon:'📋'},{id:'news',name:'Новости',icon:'📰'},
+  {id:'tech',name:'Технологии',icon:'💻'},{id:'crypto',name:'Крипто',icon:'₿'},
+  {id:'entertainment',name:'Развлечения',icon:'🎭'},{id:'education',name:'Образование',icon:'📚'},
+  {id:'business',name:'Бизнес',icon:'💼'},{id:'sport',name:'Спорт',icon:'⚽'},
+  {id:'music',name:'Музыка',icon:'🎵'},{id:'gaming',name:'Игры',icon:'🎮'},
+  {id:'travel',name:'Путешествия',icon:'✈️'},{id:'food',name:'Еда',icon:'🍕'},
+  {id:'science',name:'Наука',icon:'🔬'},{id:'design',name:'Дизайн',icon:'🎨'},
+  {id:'marketing',name:'Маркетинг',icon:'📈'}
+];
+
+const rawChannels = [
+  {id:1,name:'MAX Новости',username:'@maxnews',avatarIdx:0,category:'news',desc:'Главные новости дня в мессенджере MAX. Оперативно, честно, без цензуры.',subscribers:1250000,views:890000,growthDay:3200,growthWeek:18500,growthMonth:72000,avgViews:450000,er:36,verified:true,postsPerDay:24,totalPosts:15840,tags:['новости','россия','мир']},
+  {id:2,name:'TechHub MAX',username:'@techhubmax',avatarIdx:1,category:'tech',desc:'Обзоры гаджетов, IT-новости, стартапы и технологические тренды.',subscribers:980000,views:720000,growthDay:2800,growthWeek:15200,growthMonth:58000,avgViews:380000,er:38.8,verified:true,postsPerDay:12,totalPosts:8640,tags:['технологии','IT','гаджеты']},
+  {id:3,name:'CryptoMAX',username:'@cryptomax',avatarIdx:2,category:'crypto',desc:'Аналитика криптовалют, сигналы, обзоры рынка 24/7.',subscribers:870000,views:650000,growthDay:4100,growthWeek:22000,growthMonth:85000,avgViews:320000,er:36.8,verified:true,postsPerDay:18,totalPosts:11520,tags:['крипто','биткоин','DeFi']},
+  {id:4,name:'MAX Мемы',username:'@maxmemes',avatarIdx:3,category:'entertainment',desc:'Лучшие мемы со всего интернета. Смех продлевает жизнь! 😂',subscribers:2100000,views:1800000,growthDay:5500,growthWeek:32000,growthMonth:120000,avgViews:950000,er:45.2,verified:true,postsPerDay:30,totalPosts:21600,tags:['мемы','юмор','смешно']},
+  {id:5,name:'Бизнес Инсайды',username:'@bizinsider',avatarIdx:4,category:'business',desc:'Бизнес-стратегии, кейсы успешных предпринимателей, инвестиции.',subscribers:750000,views:520000,growthDay:1800,growthWeek:9800,growthMonth:38000,avgViews:280000,er:37.3,verified:true,postsPerDay:8,totalPosts:4800,tags:['бизнес','стратегии','инвестиции']},
+  {id:6,name:'GameZone MAX',username:'@gamezonemax',avatarIdx:5,category:'gaming',desc:'Новости игровой индустрии, обзоры, стримы и гайды.',subscribers:620000,views:480000,growthDay:2100,growthWeek:11500,growthMonth:44000,avgViews:250000,er:40.3,verified:false,postsPerDay:15,totalPosts:9000,tags:['игры','обзоры','гайды']},
+  {id:7,name:'Наука MAX',username:'@sciencemax',avatarIdx:6,category:'science',desc:'Удивительные факты науки, космос, физика и открытия.',subscribers:540000,views:390000,growthDay:1500,growthWeek:8200,growthMonth:32000,avgViews:210000,er:38.9,verified:true,postsPerDay:6,totalPosts:3960,tags:['наука','космос','физика']},
+  {id:8,name:'MAX Спорт',username:'@maxsport',avatarIdx:7,category:'sport',desc:'Все виды спорта: футбол, хоккей, баскетбол, MMA и не только.',subscribers:890000,views:670000,growthDay:2400,growthWeek:13500,growthMonth:52000,avgViews:340000,er:38.2,verified:true,postsPerDay:20,totalPosts:14400,tags:['спорт','футбол','MMA']},
+  {id:9,name:'Дизайн & UI/UX',username:'@designmax',avatarIdx:8,category:'design',desc:'Вдохновение для дизайнеров, тренды UI/UX, полезные ресурсы.',subscribers:420000,views:310000,growthDay:1200,growthWeek:6800,growthMonth:26000,avgViews:165000,er:39.3,verified:false,postsPerDay:5,totalPosts:3000,tags:['дизайн','UI/UX','тренды']},
+  {id:10,name:'Путешествия MAX',username:'@travelmax',avatarIdx:9,category:'travel',desc:'Лучшие направления, лайфхаки для путешественников, горящие туры.',subscribers:380000,views:280000,growthDay:950,growthWeek:5500,growthMonth:21000,avgViews:145000,er:38.2,verified:false,postsPerDay:4,totalPosts:2400,tags:['путешествия','туры','лайфхаки']},
+  {id:11,name:'MAX Образование',username:'@maxedu',avatarIdx:0,category:'education',desc:'Онлайн-курсы, полезные навыки, саморазвитие и обучение.',subscribers:680000,views:490000,growthDay:1900,growthWeek:10200,growthMonth:39000,avgViews:260000,er:38.2,verified:true,postsPerDay:7,totalPosts:4620,tags:['образование','курсы','навыки']},
+  {id:12,name:'Маркетинг PRO',username:'@marketingpro',avatarIdx:1,category:'marketing',desc:'Digital-маркетинг, SMM, таргет, SEO и контент-стратегии.',subscribers:510000,views:370000,growthDay:1600,growthWeek:8900,growthMonth:34000,avgViews:195000,er:38.2,verified:true,postsPerDay:6,totalPosts:3600,tags:['маркетинг','SMM','SEO']},
+  {id:13,name:'MAX Music',username:'@maxmusic',avatarIdx:2,category:'music',desc:'Новинки музыки, подборки, концерты и музыкальные новости.',subscribers:450000,views:340000,growthDay:1100,growthWeek:6200,growthMonth:24000,avgViews:180000,er:40.0,verified:false,postsPerDay:8,totalPosts:4800,tags:['музыка','новинки','концерты']},
+  {id:14,name:'Кулинарный MAX',username:'@foodmax',avatarIdx:3,category:'food',desc:'Рецепты со всего мира, кулинарные лайфхаки и обзоры ресторанов.',subscribers:320000,views:240000,growthDay:800,growthWeek:4500,growthMonth:17000,avgViews:128000,er:40.0,verified:false,postsPerDay:5,totalPosts:2500,tags:['еда','рецепты','кулинария']},
+  {id:15,name:'Breaking MAX',username:'@breakingmax',avatarIdx:4,category:'news',desc:'Срочные новости и экстренные события. Первыми узнавайте о главном.',subscribers:1580000,views:1200000,growthDay:4800,growthWeek:26000,growthMonth:95000,avgViews:620000,er:39.2,verified:true,postsPerDay:35,totalPosts:25200,tags:['новости','срочно','breaking']},
+  {id:16,name:'AI & ML Hub',username:'@aimlhub',avatarIdx:5,category:'tech',desc:'Искусственный интеллект, машинное обучение, нейросети и будущее.',subscribers:720000,views:530000,growthDay:3500,growthWeek:19000,growthMonth:73000,avgViews:280000,er:38.9,verified:true,postsPerDay:10,totalPosts:6000,tags:['AI','нейросети','ML']},
+  {id:17,name:'MAX Инвестиции',username:'@maxinvest',avatarIdx:6,category:'business',desc:'Фондовый рынок, акции, облигации, ETF и инвестиционные идеи.',subscribers:660000,views:470000,growthDay:2000,growthWeek:11000,growthMonth:42000,avgViews:245000,er:37.1,verified:true,postsPerDay:9,totalPosts:5400,tags:['инвестиции','акции','ETF']},
+  {id:18,name:'Esports MAX',username:'@esportsmax',avatarIdx:7,category:'gaming',desc:'Киберспорт: CS2, Dota 2, Valorant, LoL. Турниры и аналитика.',subscribers:490000,views:380000,growthDay:1700,growthWeek:9500,growthMonth:36000,avgViews:200000,er:40.8,verified:false,postsPerDay:12,totalPosts:7200,tags:['киберспорт','CS2','Dota']},
+  {id:19,name:'Космос MAX',username:'@spacemax',avatarIdx:8,category:'science',desc:'Космические миссии, астрономия, SpaceX и исследование вселенной.',subscribers:410000,views:300000,growthDay:1300,growthWeek:7200,growthMonth:28000,avgViews:160000,er:39.0,verified:true,postsPerDay:4,totalPosts:2640,tags:['космос','NASA','SpaceX']},
+  {id:20,name:'MAX Fitness',username:'@maxfitness',avatarIdx:9,category:'sport',desc:'Тренировки, питание, ЗОЖ и мотивация для активной жизни.',subscribers:350000,views:260000,growthDay:900,growthWeek:5100,growthMonth:19500,avgViews:138000,er:39.4,verified:false,postsPerDay:6,totalPosts:3600,tags:['фитнес','тренировки','ЗОЖ']},
+  {id:21,name:'NFT & Web3',username:'@nftweb3max',avatarIdx:0,category:'crypto',desc:'NFT коллекции, Web3 проекты, метавселенные и блокчейн.',subscribers:560000,views:410000,growthDay:2600,growthWeek:14500,growthMonth:55000,avgViews:215000,er:38.4,verified:false,postsPerDay:11,totalPosts:6600,tags:['NFT','Web3','блокчейн']},
+  {id:22,name:'MAX Cinema',username:'@maxcinema',avatarIdx:1,category:'entertainment',desc:'Обзоры фильмов и сериалов, трейлеры, рейтинги и рекомендации.',subscribers:780000,views:590000,growthDay:2200,growthWeek:12000,growthMonth:46000,avgViews:310000,er:39.7,verified:true,postsPerDay:8,totalPosts:5760,tags:['кино','сериалы','обзоры']},
+  {id:23,name:'Стартап MAX',username:'@startupmax',avatarIdx:2,category:'business',desc:'Стартапы, венчурные инвестиции, акселераторы и предпринимательство.',subscribers:430000,views:310000,growthDay:1400,growthWeek:7800,growthMonth:30000,avgViews:165000,er:38.4,verified:false,postsPerDay:5,totalPosts:3000,tags:['стартапы','венчур','инвестиции']},
+  {id:24,name:'Python MAX',username:'@pythonmax',avatarIdx:3,category:'education',desc:'Уроки Python, проекты, задачи и карьера в программировании.',subscribers:520000,views:380000,growthDay:1700,growthWeek:9300,growthMonth:36000,avgViews:200000,er:38.5,verified:true,postsPerDay:7,totalPosts:4200,tags:['Python','программирование','уроки']}
+];
+
+const fullDescs = {
+  1:'MAX Новости — ваш главный источник оперативной информации в мессенджере MAX. Мы публикуем проверенные новости из России и мира, аналитические обзоры, эксклюзивные материалы и расследования. Канал работает 24/7, обеспечивая мгновенный доступ к самым важным событиям дня.',
+  2:'TechHub MAX — крупнейший технологический канал в мессенджере MAX. Ежедневные обзоры новых гаджетов, аналитика IT-рынка, новости стартапов и технологические тренды.',
+  3:'CryptoMAX — профессиональная аналитика криптовалютного рынка 24/7. Торговые сигналы, технический и фундаментальный анализ, обзоры новых проектов.',
+  4:'MAX Мемы — самое весёлое место в мессенджере MAX! Ежедневные подборки лучших мемов со всего интернета. Более 2 миллионов подписчиков не могут ошибаться!',
+  15:'Breaking MAX — канал срочных новостей. Мы первыми сообщаем о главных событиях в России и мире. 24/7 оперативная информация.',
+  16:'AI & ML Hub — всё об искусственном интеллекте и машинном обучении. Обзоры новых моделей, туториалы по нейросетям, инструменты и карьера в AI.'
+};
+
+function genHistory(baseSubs, baseViews, days) {
+  const h = []; let s = baseSubs - Math.floor(baseSubs*.15); const now = new Date();
+  for(let i=days;i>=0;i--) {
+    const d=new Date(now); d.setDate(d.getDate()-i);
+    const g=Math.floor(Math.random()*(baseSubs*.004))+Math.floor(baseSubs*.0005);
+    s+=g; const v=Math.floor(baseViews*(.7+Math.random()*.6));
+    h.push({date:d.toISOString().split('T')[0],subscribers:s,views:v,growth:g});
+  }
+  return h;
+}
+
+const channels = rawChannels.map(ch => ({
+  ...ch, avatar:avatarGrads[ch.avatarIdx],
+  fullDesc:fullDescs[ch.id]||ch.desc,
+  createdAt:'2023-0'+(1+ch.id%9)+'-'+String(10+ch.id%20).padStart(2,'0'),
+  history:genHistory(ch.subscribers,ch.avgViews,90)
+}));
+
+// ========== UTILS ==========
+function fmt(n) { if(n>=1e6) return (n/1e6).toFixed(1)+'M'; if(n>=1e3) return (n/1e3).toFixed(1)+'K'; return ''+n; }
+function fmtFull(n) { return n.toLocaleString('ru-RU'); }
+function getCat(id) { const c=categories.find(x=>x.id===id); return c?c.name:id; }
+function getCatIcon(id) { const c=categories.find(x=>x.id===id); return c?c.icon:'📋'; }
+function catCount(id) { if(id==='all') return channels.length; return channels.filter(c=>c.category===id).length; }
+
+function makeSvgSpark(data, key, color, w, h) {
+  const vals = data.slice(-14).map(d=>d[key]);
+  const max=Math.max(...vals), min=Math.min(...vals), range=max-min||1;
+  const pts = vals.map((v,i)=>`${(i/(vals.length-1))*w},${h-2-((v-min)/range)*(h-4)}`).join(' ');
+  return `<svg width="${w}" height="${h}" class="mini-chart"><polyline points="${pts}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+
+function makeChart(data, key, color, gradId, title, height) {
+  const vals = data.map(d=>d[key]);
+  const max=Math.max(...vals), min=Math.min(...vals), range=max-min||1;
+  const W=100, H=height||240, pad={t:20,r:20,b:30,l:0};
+  const iW=W-pad.l-pad.r, iH=H-pad.t-pad.b;
+  const pts = vals.map((v,i)=>({x:pad.l+(i/(vals.length-1))*iW, y:pad.t+iH-((v-min)/range)*iH}));
+  let pathD=''; pts.forEach((p,i)=>{
+    if(i===0){pathD+=`M ${p.x} ${p.y}`}
+    else{const pr=pts[i-1];pathD+=` C ${pr.x+(p.x-pr.x)*.4} ${pr.y}, ${pr.x+(p.x-pr.x)*.6} ${p.y}, ${p.x} ${p.y}`}
+  });
+  const areaD=pathD+` L ${pts[pts.length-1].x} ${pad.t+iH} L ${pts[0].x} ${pad.t+iH} Z`;
+  let gridLines='';
+  [0,.25,.5,.75,1].forEach(f=>{
+    const y=pad.t+iH*(1-f); const v=min+range*f;
+    gridLines+=`<line x1="${pad.l}" y1="${y}" x2="${pad.l+iW}" y2="${y}" stroke="currentColor" class="text-slate-100" stroke-width=".15" stroke-dasharray=".5,.5" style="color:var(--border2)"/>`;
+    gridLines+=`<text x="${pad.l+iW+1}" y="${y+1}" font-size="2.5" fill="var(--text4)">${fmt(Math.round(v))}</text>`;
+  });
+  return `<svg viewBox="0 0 ${W} ${H}" class="chart-svg" style="height:${H}px" preserveAspectRatio="none">
+    <defs><linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${color}" stop-opacity=".3"/><stop offset="100%" stop-color="${color}" stop-opacity=".02"/></linearGradient></defs>
+    ${gridLines}<path d="${areaD}" fill="url(#${gradId})"/><path d="${pathD}" fill="none" stroke="${color}" stroke-width=".4" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>`;
+}
+
+// ========== STATE ==========
+let state = {
+  page:'home', channelId:null, topSort:'subscribers',
+  search:'', category:'all', sortBy:'subscribers', timePeriod:'day', verifiedOnly:false,
+  theme:'dark', showModal:false, showNotif:false, showShare:false, shareLink:'',
+  favs: JSON.parse(localStorage.getItem('mm_favs')||'[]'),
+  compare: [], recent: JSON.parse(localStorage.getItem('mm_recent')||'[]'),
+  mobileMenu:false
+};
+
+function saveFavs() { localStorage.setItem('mm_favs',JSON.stringify(state.favs)); }
+function saveRecent() { localStorage.setItem('mm_recent',JSON.stringify(state.recent)); }
+function toggleFav(id) { state.favs.includes(id)?state.favs=state.favs.filter(x=>x!==id):state.favs.push(id); saveFavs(); render(); }
+function toggleCompare(id) { state.compare.includes(id)?state.compare=state.compare.filter(x=>x!==id):(state.compare.length<4&&state.compare.push(id)); render(); }
+function addRecent(id) { state.recent=[id,...state.recent.filter(x=>x!==id)].slice(0,10); saveRecent(); }
+
+function navigate(page, data) {
+  state.mobileMenu=false; state.showNotif=false;
+  if(page==='home'){state.page='home';}
+  else if(page==='channel'){state.page='channel';state.channelId=data;addRecent(data);}
+  else if(page==='top'){state.page='top';state.topSort=data||'subscribers';}
+  else if(page==='compare'){state.page='compare';}
+  else if(page==='favorites'){state.page='favorites';}
+  else if(page==='category'){state.category=data;state.page='home';}
+  window.scrollTo({top:0,behavior:'smooth'});
+  render();
+}
+
+function getFiltered() {
+  let r=[...channels];
+  if(state.search.trim()){const q=state.search.toLowerCase();r=r.filter(c=>c.name.toLowerCase().includes(q)||c.username.toLowerCase().includes(q)||c.desc.toLowerCase().includes(q)||c.tags.some(t=>t.toLowerCase().includes(q)));}
+  if(state.category!=='all') r=r.filter(c=>c.category===state.category);
+  if(state.verifiedOnly) r=r.filter(c=>c.verified);
+  let sk=state.sortBy;
+  if(sk==='growthDay'||sk==='growthWeek'||sk==='growthMonth'){sk=state.timePeriod==='day'?'growthDay':state.timePeriod==='week'?'growthWeek':'growthMonth';}
+  r.sort((a,b)=>b[sk]-a[sk]);
+  return r;
+}
+
+// ========== SVG ICONS ==========
+const icons = {
+  search:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>',
+  sun:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>',
+  moon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>',
+  menu:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>',
+  x:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>',
+  home:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
+  trending:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>',
+  chart:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg>',
+  compare:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="18" r="3"/><circle cx="18" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><path d="M11 18H8a2 2 0 0 1-2-2V9"/></svg>',
+  heart:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>',
+  heartFill:'<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>',
+  bell:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>',
+  users:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+  eye:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>',
+  check:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>',
+  back:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>',
+  share:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/></svg>',
+  copy:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>',
+  crown:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7Z"/><path d="M4 18h16"/></svg>',
+  plus:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>',
+  sparkle:'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>',
+  sort:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="m21 8-4-4-4 4"/><path d="M17 4v16"/></svg>',
+  clock:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+  calendar:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg>',
+  globe:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>',
+  link:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>',
+  chevron:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>',
+  activity:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>',
+  msg:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>',
+  badge:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m9 12 2 2 4-4"/></svg>',
+  zap:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
+  hash:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="9" y2="9"/><line x1="4" x2="20" y1="15" y2="15"/><line x1="10" x2="8" y1="3" y2="21"/><line x1="16" x2="14" y1="3" y2="21"/></svg>',
+};
+
+const logoSvg = `<svg width="36" height="36" viewBox="0 0 36 36" fill="none" class="logo-icon"><defs><linearGradient id="lBg" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#8b5cf6"/><stop offset="50%" stop-color="#7c3aed"/><stop offset="100%" stop-color="#3b82f6"/></linearGradient></defs><rect width="36" height="36" rx="10" fill="url(#lBg)"/><line x1="6" y1="26" x2="30" y2="26" stroke="white" stroke-opacity=".1" stroke-width=".5"/><line x1="6" y1="20" x2="30" y2="20" stroke="white" stroke-opacity=".07" stroke-width=".5"/><polyline points="7,24 13,19 18,21 23,13 29,9" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="29" cy="9" r="2.5" fill="white"/><circle cx="29" cy="9" r="1.2" fill="#3b82f6"/><rect x="8" y="27" width="3" height="3" rx=".8" fill="white" fill-opacity=".2"/><rect x="13" y="25" width="3" height="5" rx=".8" fill="white" fill-opacity=".25"/><rect x="18" y="26" width="3" height="4" rx=".8" fill="white" fill-opacity=".2"/><rect x="23" y="24" width="3" height="6" rx=".8" fill="white" fill-opacity=".3"/></svg>`;
+
+// ========== RENDER ==========
+function render() {
+  document.body.className = state.theme;
+  const app = document.getElementById('app');
+  let html = '';
+  html += renderHeader();
+  if(state.page==='channel') html += renderChannelPage();
+  else if(state.page==='top') html += renderTopPage();
+  else if(state.page==='compare') html += renderComparePage();
+  else if(state.page==='favorites') html += renderFavoritesPage();
+  else html += renderHomePage();
+  html += renderFooter();
+  html += renderBottomNav();
+  if(state.showModal) html += renderAddModal();
+  if(state.showShare) html += renderShareModal();
+  app.innerHTML = html;
+  bindEvents();
+}
+
+function renderHeader() {
+  const unread = 3;
+  return `<header class="header"><div class="container"><div class="header-inner">
+    <div class="logo" onclick="navigate('home')">${logoSvg}<div><div class="logo-text"><span>Max</span>Metric</div><div class="logo-sub">Аналитика каналов MAX</div></div></div>
+    <nav class="header-nav">
+      <button class="nav-btn" onclick="navigate('home')">${icons.home} Главная</button>
+      <button class="nav-btn" onclick="navigate('top','subscribers')">${icons.trending} Рейтинг</button>
+      <button class="nav-btn" onclick="navigate('top','growthDay')">${icons.chart} Прирост</button>
+      <button class="nav-btn" onclick="navigate('compare')">${icons.compare} Сравнение${state.compare.length?`<span class="nav-badge violet">${state.compare.length}</span>`:''}</button>
+      <button class="nav-btn" onclick="navigate('favorites')">${icons.heart} Избранное${state.favs.length?`<span class="nav-badge pink">${state.favs.length}</span>`:''}</button>
+    </nav>
+    <div class="header-search">${icons.search}<input placeholder="Поиск каналов..." value="${state.search}" oninput="state.search=this.value;if(state.page!=='home')navigate('home');else render();" />${state.search?`<button style="position:absolute;right:10px;top:50%;transform:translateY(-50%);color:var(--text4)" onclick="state.search='';render()">${icons.x}</button>`:''}</div>
+    <div class="header-actions">
+      <div style="position:relative"><button class="icon-btn" onclick="state.showNotif=!state.showNotif;render()">${icons.bell}${unread?`<span class="notif-dot">${unread}</span>`:''}</button>${state.showNotif?renderNotifDropdown():''}</div>
+      <button class="add-btn" onclick="state.showModal=true;render()"><span style="font-size:16px;line-height:1">+</span> Добавить</button>
+      <button class="icon-btn" onclick="state.theme=state.theme==='dark'?'light':'dark';render()">${state.theme==='dark'?icons.sun:icons.moon}</button>
+      <button class="icon-btn" style="display:none" id="mobile-menu-btn" onclick="state.mobileMenu=!state.mobileMenu;render()">${state.mobileMenu?icons.x:icons.menu}</button>
+    </div>
+  </div></div></header>`;
+}
+
+function renderNotifDropdown() {
+  const notifs = [
+    {title:'Новый рекорд!',msg:'MAX Мемы достигли 2.1M подписчиков',time:'5 мин назад',icon:'🏆',unread:true},
+    {title:'Взрывной рост',msg:'CryptoMAX: +4100 подписчиков за день',time:'1 час назад',icon:'📈',unread:true},
+    {title:'Новый канал',msg:'AI & ML Hub добавлен в каталог',time:'3 часа назад',icon:'✨',unread:true},
+    {title:'Обновление',msg:'Добавлены новые фильтры',time:'1 день назад',icon:'🔄',unread:false},
+  ];
+  return `<div class="notif-dropdown" onclick="event.stopPropagation()"><div class="notif-header" style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:13px;font-weight:700;color:var(--text)">Уведомления</span></div>${notifs.map(n=>`<div class="notif-item ${n.unread?'unread':''}"><span style="font-size:18px;flex-shrink:0">${n.icon}</span><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:var(--text)">${n.title}</div><div style="font-size:11px;color:var(--text3);margin-top:2px">${n.msg}</div><div style="font-size:10px;color:var(--text4);margin-top:4px">${n.time}</div></div>${n.unread?'<div style="width:8px;height:8px;border-radius:4px;background:var(--violet);flex-shrink:0;margin-top:6px"></div>':''}</div>`).join('')}</div>`;
+}
+
+function renderHomePage() {
+  const filtered = getFiltered();
+  let html = '<main class="main-content"><div class="container" style="padding-top:24px">';
+  html += renderHero();
+  html += renderStats();
+  if(state.recent.length>0 && !state.search && state.category==='all') html += renderRecent();
+  html += renderTopChannels();
+  html += renderMobileCats();
+  html += '<div class="main-layout">';
+  html += renderSidebar();
+  html += '<div class="content-area">';
+  html += renderSortBar();
+  html += `<div class="results-info"><span>Найдено: <strong>${filtered.length}</strong> каналов${state.verifiedOnly?' <span style="font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(59,130,246,.08);color:var(--blue)">✓ Верифицированные</span>':''}</span>${state.category!=='all'?`<button class="reset-btn" onclick="state.category='all';render()">Сбросить ✕</button>`:''}</div>`;
+  if(filtered.length===0) {
+    html += `<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-title">Ничего не найдено</div><div class="empty-desc">Попробуйте изменить запрос или категорию</div><button class="primary-btn" onclick="state.search='';state.category='all';state.verifiedOnly=false;render()">Сбросить фильтры</button></div>`;
+  } else {
+    html += '<div class="channel-grid">';
+    filtered.forEach((ch,i) => html += renderChannelCard(ch,i+1));
+    html += '</div>';
+  }
+  html += '</div></div></div></main>';
+  return html;
+}
+
+function renderHero() {
+  const tags = [{id:'news',l:'Новости',i:'📰'},{id:'tech',l:'Технологии',i:'💻'},{id:'crypto',l:'Крипто',i:'₿'},{id:'business',l:'Бизнес',i:'💼'},{id:'entertainment',l:'Развлечения',i:'🎭'},{id:'gaming',l:'Игры',i:'🎮'},{id:'science',l:'Наука',i:'🔬'}];
+  return `<div class="hero"><div class="hero-bg"></div><div class="hero-pattern"></div><div class="hero-deco1"></div><div class="hero-deco2"></div>
+    <svg style="position:absolute;bottom:0;left:0;right:0;height:60px;opacity:.1" viewBox="0 0 400 60" preserveAspectRatio="none"><polyline points="0,50 40,40 80,45 120,30 160,35 200,20 240,25 280,15 320,18 360,10 400,15" fill="none" stroke="white" stroke-width="1.5"/><polygon points="0,50 40,40 80,45 120,30 160,35 200,20 240,25 280,15 320,18 360,10 400,15 400,60 0,60" fill="white" fill-opacity=".05"/></svg>
+    <div class="hero-content">
+      <div class="hero-badge">${icons.sparkle} Каталог и аналитика каналов MAX</div>
+      <h2>Аналитика каналов<br><span>мессенджера MAX</span></h2>
+      <p>Рейтинги, статистика, графики роста и сравнение каналов. Всё в одном месте.</p>
+      <div class="hero-search">${icons.search}<input placeholder="Найти канал по названию, username или тегу..." value="${state.search}" oninput="state.search=this.value;render()" /></div>
+      <div class="hero-tags">${tags.map(t=>`<button class="hero-tag" onclick="state.category='${t.id}';setTimeout(()=>document.getElementById('ch-list')?.scrollIntoView({behavior:'smooth'}),100);render()"><span>${t.i}</span> ${t.l}</button>`).join('')}</div>
+      <div class="hero-actions">
+        <button class="hero-action-btn glass" onclick="navigate('top','subscribers')">${icons.trending} Топ каналов</button>
+        <button class="hero-action-btn glass" onclick="navigate('top','subscribers')">${icons.users} По подписчикам</button>
+        <button class="hero-action-btn solid" onclick="navigate('top','subscribers')">${icons.zap} Быстрый старт</button>
+      </div>
+    </div></div>`;
+}
+
+function renderStats() {
+  const ts=channels.reduce((a,c)=>a+c.subscribers,0), tv=channels.reduce((a,c)=>a+c.views,0), tg=channels.reduce((a,c)=>a+c.growthDay,0);
+  const vc=channels.filter(c=>c.verified).length, ae=(channels.reduce((a,c)=>a+c.er,0)/channels.length).toFixed(1);
+  const stats = [
+    {l:'Каналов в каталоге',v:''+channels.length,icon:icons.hash,grad:'grad-blue'},
+    {l:'Подписчиков всего',v:fmt(ts),icon:icons.users,grad:'grad-violet'},
+    {l:'Просмотров всего',v:fmt(tv),icon:icons.eye,grad:'grad-emerald'},
+    {l:'Прирост за день',v:'+'+fmt(tg),icon:icons.trending,grad:'grad-orange'},
+    {l:'Верифицированных',v:''+vc,icon:icons.badge,grad:'grad-indigo'},
+    {l:'Средний ER',v:ae+'%',icon:icons.msg,grad:'grad-pink'},
+  ];
+  return `<div class="stats-bar">${stats.map(s=>`<div class="stat-card"><div class="deco ${s.grad}"></div><div class="stat-icon ${s.grad}">${s.icon}</div><div class="stat-val">${s.v}</div><div class="stat-label">${s.l}</div></div>`).join('')}</div>`;
+}
+
+function renderRecent() {
+  const rc = state.recent.map(id=>channels.find(c=>c.id===id)).filter(Boolean).slice(0,6);
+  if(!rc.length) return '';
+  return `<div class="recent-section"><div class="recent-title">${icons.clock} Недавно просмотренные</div><div class="recent-scroll">${rc.map(ch=>`<div class="recent-card" onclick="navigate('channel',${ch.id})"><div class="recent-avatar ${ch.avatar}">${ch.name[0]}</div><div><div class="recent-name">${ch.name}</div><div class="recent-subs">${fmt(ch.subscribers)} подп.</div></div></div>`).join('')}</div></div>`;
+}
+
+function renderTopChannels() {
+  const bySubs=[...channels].sort((a,b)=>b.subscribers-a.subscribers).slice(0,5);
+  const byViews=[...channels].sort((a,b)=>b.views-a.views).slice(0,5);
+  const byGrowth=[...channels].sort((a,b)=>b.growthDay-a.growthDay).slice(0,5);
+  function topCard(title,icon,grad,chs,vk,isG) {
+    const ranks=['background:rgba(251,191,36,.12);color:#f59e0b','background:rgba(148,163,184,.15);color:#94a3b8','background:rgba(251,146,60,.12);color:#fb923c','background:var(--bg3);color:var(--text4)','background:var(--bg3);color:var(--text4)'];
+    return `<div class="card"><div class="top-card-header" style="background:linear-gradient(135deg,${grad})"><h3><div class="icon-wrap">${icon}</div>${title}</h3>${icons.crown}</div><div style="padding:8px">${chs.map((ch,i)=>`<div class="top-item" onclick="navigate('channel',${ch.id})"><div class="top-rank" style="${ranks[i]}">${i+1}</div><div class="top-avatar ${ch.avatar}">${ch.name[0]}</div><div class="top-info"><div class="top-name">${ch.name}</div><div class="top-username">${ch.username}</div></div><div class="top-val" style="color:${isG?'var(--emerald)':'var(--text)'}">${isG?'+':''}${fmt(ch[vk])}</div></div>`).join('')}</div><button class="top-view-all" onclick="navigate('top','${vk}')">Показать полный рейтинг →</button></div>`;
+  }
+  return `<div class="top-grid">${topCard('Топ по подписчикам',icons.users,'#3b82f6,#06b6d4',bySubs,'subscribers',false)}${topCard('Топ по просмотрам',icons.eye,'#10b981,#14b8a6',byViews,'views',false)}${topCard('Топ по приросту',icons.trending,'#8b5cf6,#a855f7',byGrowth,'growthDay',true)}</div>`;
+}
+
+function renderSidebar() {
+  return `<div class="sidebar"><div class="sidebar-inner"><div class="sidebar-title">Категории</div>${categories.map(c=>`<button class="cat-btn ${state.category===c.id?'active':''}" onclick="state.category='${c.id}';render()"><span>${c.icon}</span><span style="flex:1;text-align:left">${c.name}</span><span class="count">${catCount(c.id)}</span></button>`).join('')}
+  <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border2);padding:16px 12px 0"><div class="sidebar-title">Быстрые ссылки</div><div style="display:flex;justify-content:space-between;font-size:12px;margin:8px 0"><span style="color:var(--text3)">Всего каналов</span><span style="font-weight:700;color:var(--text)">${channels.length}</span></div><div style="display:flex;justify-content:space-between;font-size:12px;margin:8px 0"><span style="color:var(--text3)">Верифицированных</span><span style="font-weight:700;color:var(--emerald)">${channels.filter(c=>c.verified).length}</span></div></div>
+  </div></div>`;
+}
+
+function renderMobileCats() {
+  return `<div class="mobile-cats">${categories.map(c=>`<button class="mcat-btn ${state.category===c.id?'active':''}" onclick="state.category='${c.id}';render()"><span>${c.icon}</span>${c.name}</button>`).join('')}</div>`;
+}
+
+function renderSortBar() {
+  const isG = state.sortBy==='growthDay'||state.sortBy==='growthWeek'||state.sortBy==='growthMonth';
+  return `<div class="sort-bar" id="ch-list"><div class="sort-group"><div class="sort-icon">${icons.sort}</div>
+    <div class="sort-pills">
+      <button class="sort-pill ${state.sortBy==='subscribers'?'active':''}" onclick="state.sortBy='subscribers';render()">${icons.users} Подписчики</button>
+      <button class="sort-pill ${state.sortBy==='views'?'active':''}" onclick="state.sortBy='views';render()">${icons.eye} Просмотры</button>
+      <button class="sort-pill ${isG?'active':''}" onclick="state.sortBy='growthDay';render()">${icons.trending} Прирост</button>
+    </div></div>
+    <div class="sort-group">
+      <div class="sort-pills period-pills ${isG?'show':''}">
+        <button class="period-pill ${state.timePeriod==='day'?'active':''}" onclick="state.timePeriod='day';state.sortBy='growthDay';render()">День</button>
+        <button class="period-pill ${state.timePeriod==='week'?'active':''}" onclick="state.timePeriod='week';state.sortBy='growthWeek';render()">Неделя</button>
+        <button class="period-pill ${state.timePeriod==='month'?'active':''}" onclick="state.timePeriod='month';state.sortBy='growthMonth';render()">Месяц</button>
+      </div>
+      <button class="verified-btn ${state.verifiedOnly?'active':''}" onclick="state.verifiedOnly=!state.verifiedOnly;render()">${icons.check} <span class="hide-mobile">Верифицированные</span><span class="show-mobile">✓</span></button>
+    </div></div>`;
+}
+
+function renderChannelCard(ch, rank) {
+  const isFav=state.favs.includes(ch.id), isCmp=state.compare.includes(ch.id);
+  const rankGrad = rank<=3?[,'linear-gradient(135deg,#fbbf24,#d97706)','linear-gradient(135deg,#94a3b8,#64748b)','linear-gradient(135deg,#fb923c,#ea580c)'][rank]:'linear-gradient(135deg,#8b5cf6,#7c3aed)';
+  const growthKey = state.timePeriod==='day'?'growthDay':state.timePeriod==='week'?'growthWeek':'growthMonth';
+  return `<div class="ch-card fade-in" style="animation-delay:${Math.min(rank*30,300)}ms" onclick="navigate('channel',${ch.id})">
+    <div class="ch-rank" style="background:${rankGrad}">${rank}</div>
+    <div class="ch-actions">
+      <button class="ch-act-btn ${isCmp?'cmp-active':''}" onclick="event.stopPropagation();toggleCompare(${ch.id})" title="Сравнить">${icons.compare}</button>
+      <button class="ch-act-btn ${isFav?'fav-active':''}" onclick="event.stopPropagation();toggleFav(${ch.id})" title="Избранное">${isFav?icons.heartFill:icons.heart}</button>
+    </div>
+    <div class="ch-top"><div class="ch-avatar ${ch.avatar}">${ch.name[0]}</div><div class="ch-info"><div class="ch-name-row"><span class="ch-name">${ch.name}</span>${ch.verified?`<span class="ch-verified">${icons.badge}</span>`:''}</div><div class="ch-username">${ch.username}</div><div class="ch-desc">${ch.desc}</div></div></div>
+    ${ch.tags.length?`<div class="ch-tags">${ch.tags.slice(0,3).map(t=>`<span class="ch-tag">#${t}</span>`).join('')}</div>`:''}
+    <div class="sparkline">${makeSvgSpark(ch.history,'subscribers','#8b5cf6',120,28)}<span>14 дней</span></div>
+    <div class="ch-stats">
+      <div><div class="ch-stat-val" style="color:var(--blue)">${icons.users} ${fmt(ch.subscribers)}</div><div class="ch-stat-label">подписчиков</div></div>
+      <div><div class="ch-stat-val" style="color:var(--emerald)">${icons.eye} ${fmt(ch.avgViews)}</div><div class="ch-stat-label">просмотров</div></div>
+      <div><div class="ch-stat-val" style="color:var(--emerald)">+${fmt(ch[growthKey])}</div><div class="ch-stat-label">за ${state.timePeriod==='day'?'день':state.timePeriod==='week'?'неделю':'месяц'}</div></div>
+    </div>
+    <div class="ch-er-row"><span class="ch-er">ER: ${ch.er}%</span><span class="ch-posts">${ch.postsPerDay} пост/день</span></div>
+  </div>`;
+}
+
+function renderChannelPage() {
+  const ch = channels.find(c=>c.id===state.channelId);
+  if(!ch) return '<div class="container" style="padding:40px;text-align:center">Канал не найден</div>';
+  const hist=ch.history, last7=hist.slice(-7), last30=hist.slice(-30);
+  const avgG7=Math.floor(last7.reduce((a,d)=>a+d.growth,0)/7);
+  const avgG30=Math.floor(last30.reduce((a,d)=>a+d.growth,0)/30);
+  const maxG=Math.max(...last30.map(d=>d.growth));
+  const isFav=state.favs.includes(ch.id), isCmp=state.compare.includes(ch.id);
+  const subsRank=[...channels].sort((a,b)=>b.subscribers-a.subscribers).findIndex(c=>c.id===ch.id)+1;
+  const viewsRank=[...channels].sort((a,b)=>b.avgViews-a.avgViews).findIndex(c=>c.id===ch.id)+1;
+  const growthRank=[...channels].sort((a,b)=>b.growthDay-a.growthDay).findIndex(c=>c.id===ch.id)+1;
+  const related = channels.filter(c=>c.category===ch.category&&c.id!==ch.id).slice(0,4);
+  const daysActive = Math.floor((Date.now()-new Date(ch.createdAt).getTime())/(864e5));
+
+  let html = `<div class="detail-bar"><div class="container"><div class="detail-bar-inner">
+    <button class="back-btn" onclick="navigate('home')">${icons.back} Назад к каталогу</button>
+    <div class="detail-actions">
+      <button class="icon-btn" onclick="navigate('category','${ch.category}')" style="font-size:12px;padding:6px 12px">${getCatIcon(ch.category)} ${getCat(ch.category)}</button>
+      <button class="icon-btn ${isCmp?'cmp-active':''}" onclick="toggleCompare(${ch.id})" style="${isCmp?'background:rgba(139,92,246,.15);color:var(--violet);border-color:rgba(139,92,246,.3)':''}">${icons.compare}</button>
+      <button class="icon-btn ${isFav?'fav-active':''}" onclick="toggleFav(${ch.id})" style="${isFav?'background:rgba(236,72,153,.1);color:var(--pink);border-color:rgba(236,72,153,.3)':''}">${isFav?icons.heartFill:icons.heart}</button>
+      <button class="icon-btn" onclick="state.showShare=true;state.shareLink='https://max.me/${ch.username.replace('@','')}';render()">${icons.share}</button>
+    </div></div></div></div>`;
+
+  html += `<div class="container" style="padding-top:24px">`;
+
+  // Header card
+  html += `<div class="ch-header-card"><div class="ch-banner ${ch.avatar}" style="position:relative"><div style="position:absolute;inset:0;background:rgba(0,0,0,.1)"></div></div>
+    <div class="ch-header-body"><div class="ch-header-top"><div class="ch-big-avatar ${ch.avatar}" style="border-color:var(--bg2)">${ch.name[0]}</div>
+      <div class="ch-header-info"><div class="ch-big-name">${ch.name} ${ch.verified?icons.badge:''}</div><div class="ch-big-username">${ch.username}</div>
+        <div class="ch-full-desc">${ch.fullDesc}</div>
+        <div class="ch-rankings">
+          <span class="ch-ranking-badge" style="background:rgba(251,191,36,.1);color:#d97706">🏆 #${subsRank} по подписчикам</span>
+          <span class="ch-ranking-badge" style="background:rgba(16,185,129,.1);color:var(--emerald)">👁 #${viewsRank} по просмотрам</span>
+          <span class="ch-ranking-badge" style="background:rgba(139,92,246,.1);color:var(--violet)">📈 #${growthRank} по приросту</span>
+        </div>
+        <div class="ch-detail-tags">${ch.tags.map(t=>`<span class="ch-detail-tag">#${t}</span>`).join('')}</div>
+        <div class="ch-meta-row">
+          <span class="ch-meta-item">${icons.globe} Русский</span>
+          <span class="ch-meta-item">${icons.calendar} ${new Date(ch.createdAt).toLocaleDateString('ru-RU')}</span>
+          <span class="ch-meta-item">${icons.clock} ${daysActive} дней</span>
+          <span class="ch-meta-item link" onclick="window.open('https://max.me/${ch.username.replace('@','')}')">${icons.link} Открыть в MAX</span>
+        </div>
+      </div></div></div></div>`;
+
+  // Stats grid
+  const detailStats = [
+    {l:'Подписчиков',v:fmtFull(ch.subscribers),icon:icons.users,g:'grad-blue'},
+    {l:'Ср. просмотры',v:fmt(ch.avgViews),icon:icons.eye,g:'grad-emerald',sub:'за пост'},
+    {l:'Прирост/день',v:'+'+fmt(ch.growthDay),icon:icons.trending,g:'grad-violet',sub:`ср. +${fmt(avgG7)}/7д`},
+    {l:'ER канала',v:ch.er+'%',icon:icons.activity,g:'grad-amber',sub:'вовлечённость'},
+    {l:'Постов/день',v:''+ch.postsPerDay,icon:icons.msg,g:'grad-pink',sub:`всего ${fmt(ch.totalPosts)}`},
+    {l:'Прирост/мес',v:'+'+fmt(ch.growthMonth),icon:icons.chart,g:'grad-indigo',sub:`ср. +${fmt(avgG30)}/д`},
+  ];
+  html += `<div class="detail-stats">${detailStats.map(s=>`<div class="stat-card"><div class="deco ${s.g}"></div><div class="stat-icon ${s.g}">${s.icon}</div><div class="stat-val">${s.v}</div><div class="stat-label">${s.l}</div>${s.sub?`<div class="stat-label">${s.sub}</div>`:''}</div>`).join('')}</div>`;
+
+  // Extra stats
+  html += `<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:24px">
+    ${[['Прирост за 7 дн','+'+fmt(ch.growthWeek),makeSvgSpark(hist,'growth','#8b5cf6',100,28)],['Макс. прирост/день','+'+fmt(maxG),'<div style="font-size:10px;color:var(--text4);margin-top:4px">Ср: +'+fmt(avgG7)+'</div>'],['Ср. просмотры/7д',fmt(Math.floor(last7.reduce((a,d)=>a+d.views,0)/7)),makeSvgSpark(hist,'views','#10b981',100,28)],['Всего постов',fmtFull(ch.totalPosts),'<div style="font-size:10px;color:var(--text4);margin-top:4px">'+ch.postsPerDay+' постов/день</div>']].map(s=>`<div class="stat-card"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:12px;color:var(--text3)">${s[0]}</span></div><div style="font-size:20px;font-weight:800;color:var(--text)">${s[1]}</div>${s[2]}</div>`).join('')}
+  </div>`;
+
+  // Charts
+  const chartData30 = hist.slice(-30);
+  html += `<div class="charts-grid">
+    <div class="chart-card"><div class="chart-header"><div><div class="chart-title">📈 Динамика подписчиков</div><div class="chart-value">${fmtFull(hist[hist.length-1].subscribers)}</div></div></div><div class="chart-body">${makeChart(chartData30,'subscribers','#8b5cf6','subG','',220)}<div class="chart-dates"><span>${chartData30[0].date}</span><span>${chartData30[chartData30.length-1].date}</span></div></div></div>
+    <div class="chart-card"><div class="chart-header"><div><div class="chart-title">👁 Просмотры по дням</div><div class="chart-value">${fmt(hist[hist.length-1].views)}</div></div></div><div class="chart-body">${makeChart(chartData30,'views','#10b981','viewG','',220)}<div class="chart-dates"><span>${chartData30[0].date}</span><span>${chartData30[chartData30.length-1].date}</span></div></div></div>
+  </div>`;
+  html += `<div class="chart-card" style="margin-bottom:24px"><div class="chart-header"><div><div class="chart-title">🚀 Прирост подписчиков по дням</div></div></div><div class="chart-body">${makeChart(chartData30,'growth','#f59e0b','growG','',200)}<div class="chart-dates"><span>${chartData30[0].date}</span><span>${chartData30[chartData30.length-1].date}</span></div></div></div>`;
+
+  // Table
+  html += `<div class="card" style="margin-bottom:24px"><div style="padding:16px 20px;border-bottom:1px solid var(--border2)"><span style="font-size:14px;font-weight:700;color:var(--text)">📊 Статистика по дням (14 дней)</span></div><div class="table-scroll"><table class="data-table"><thead><tr><th>Дата</th><th class="right">Подписчики</th><th class="right">Прирост</th><th class="right">Просмотры</th></tr></thead><tbody>${hist.slice(-14).reverse().map((d,i)=>`<tr class="${i===0?'today':''}"><td>${new Date(d.date).toLocaleDateString('ru-RU',{day:'numeric',month:'short'})}${i===0?'<span class="today-badge">сегодня</span>':''}</td><td class="right" style="font-weight:600;color:var(--text)">${fmtFull(d.subscribers)}</td><td class="right" style="color:var(--emerald);font-weight:600">+${fmtFull(d.growth)}</td><td class="right" style="color:var(--text2)">${fmtFull(d.views)}</td></tr>`).join('')}</tbody></table></div></div>`;
+
+  // Related
+  if(related.length) {
+    html += `<div class="related-section"><div class="related-title">Похожие каналы в «${getCat(ch.category)}»</div><div class="channel-grid">${related.map((c,i)=>renderChannelCard(c,i+1)).join('')}</div></div>`;
+  }
+  html += '</div>';
+  return html;
+}
+
+function renderTopPage() {
+  let sortBy=state.topSort;
+  const sortTabs=[{k:'subscribers',l:'По подписчикам',i:icons.users},{k:'views',l:'По просмотрам',i:icons.eye},{k:'growthDay',l:'По приросту',i:icons.trending}];
+  const sorted=[...channels].sort((a,b)=>b[sortBy]-a[sortBy]);
+  const rankGrads = i => i===0?'grad-amber':i===1?'background:linear-gradient(135deg,#94a3b8,#64748b)':i===2?'grad-orange':'grad-violet';
+  const rankStyles = i => i<3?[,'linear-gradient(135deg,#fbbf24,#d97706)','linear-gradient(135deg,#94a3b8,#64748b)','linear-gradient(135deg,#fb923c,#ea580c)'][i+1]:'linear-gradient(135deg,#8b5cf6,#7c3aed)';
+
+  return `<div class="detail-bar"><div class="container"><div class="detail-bar-inner"><button class="back-btn" onclick="navigate('home')">${icons.back} Назад</button><div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--text)">${icons.crown} Топ каналов MAX</div></div></div></div>
+  <div class="container main-content" style="padding-top:24px;max-width:960px">
+    <div class="top-page-title"><h1>🏆 Рейтинг каналов MAX</h1><p>Полный рейтинг всех каналов по разным метрикам</p></div>
+    <div style="display:flex;justify-content:center;margin-bottom:24px"><div class="sort-pills">${sortTabs.map(t=>`<button class="sort-pill ${sortBy===t.k?'active':''}" onclick="state.topSort='${t.k}';render()">${t.i} ${t.l}</button>`).join('')}</div></div>
+    <div class="card"><div class="table-scroll"><table class="data-table top-table"><thead><tr><th style="width:48px">#</th><th>Канал</th><th class="right">Подписчики</th><th class="right">Просмотры</th><th class="right">Прирост/д</th><th class="right">ER</th></tr></thead><tbody>
+    ${sorted.map((ch,i)=>`<tr class="${i<3?'gold':''}" style="cursor:pointer" onclick="navigate('channel',${ch.id})"><td><div class="top-table-rank" style="background:${rankStyles(i)}">${i+1}</div></td><td><div style="display:flex;align-items:center;gap:10px"><div class="top-table-avatar ${ch.avatar}">${ch.name[0]}</div><div><div style="display:flex;align-items:center;gap:4px"><span class="top-table-name">${ch.name}</span>${ch.verified?`<span style="color:var(--blue)">${icons.badge}</span>`:''}</div><div class="top-table-username">${ch.username}</div></div></div></td><td class="right" style="font-weight:700;color:var(--text)">${fmt(ch.subscribers)}<br><span style="font-size:10px;color:var(--text4)">${fmtFull(ch.subscribers)}</span></td><td class="right" style="color:var(--text2)">${fmt(ch.avgViews)}</td><td class="right" style="font-weight:700;color:var(--emerald)">+${fmt(ch.growthDay)}</td><td class="right"><span class="er-badge ${ch.er>=40?'high':ch.er>=37?'mid':'low'}">${ch.er}%</span></td></tr>`).join('')}
+    </tbody></table></div></div></div>`;
+}
+
+function renderComparePage() {
+  const chs = channels.filter(c=>state.compare.includes(c.id));
+  if(!chs.length) return `<div class="detail-bar"><div class="container"><div class="detail-bar-inner"><button class="back-btn" onclick="navigate('home')">${icons.back} Назад</button><span style="font-size:13px;font-weight:600;color:var(--text)">Сравнение каналов</span></div></div></div><div class="fav-empty"><div style="text-align:center"><div class="fav-empty-icon" style="background:rgba(139,92,246,.1)">${icons.chart}</div><div class="empty-title">Нет каналов для сравнения</div><div class="empty-desc">Нажмите на иконку сравнения на карточке канала</div><button class="primary-btn" onclick="navigate('home')">Вернуться к каталогу</button></div></div>`;
+
+  const metrics=[{k:'subscribers',l:'Подписчики',i:icons.users,f:v=>fmtFull(v)},{k:'avgViews',l:'Ср. просмотры',i:icons.eye,f:v=>fmt(v)},{k:'growthDay',l:'Прирост/день',i:icons.trending,f:v=>'+'+fmt(v),g:true},{k:'growthWeek',l:'Прирост/неделя',i:icons.trending,f:v=>'+'+fmt(v),g:true},{k:'growthMonth',l:'Прирост/месяц',i:icons.chart,f:v=>'+'+fmt(v),g:true},{k:'er',l:'ER',i:icons.activity,f:v=>v+'%'},{k:'postsPerDay',l:'Постов/день',i:icons.msg,f:v=>''+v},{k:'totalPosts',l:'Всего постов',i:icons.msg,f:v=>fmtFull(v)}];
+  const best = k => Math.max(...chs.map(c=>c[k]));
+
+  return `<div class="detail-bar"><div class="container"><div class="detail-bar-inner"><button class="back-btn" onclick="navigate('home')">${icons.back} Назад</button><span style="font-size:13px;font-weight:600;color:var(--text)">⚖️ Сравнение каналов (${chs.length})</span></div></div></div>
+  <div class="container main-content" style="padding-top:24px"><h1 style="text-align:center;font-size:24px;font-weight:800;color:var(--text);margin-bottom:24px">⚖️ Сравнение каналов</h1>
+  <div class="card"><div class="table-scroll"><table class="compare-table"><thead><tr><th style="text-align:left">Метрика</th>${chs.map(ch=>`<th><div style="display:flex;flex-direction:column;align-items:center;gap:8px"><div class="compare-avatar ${ch.avatar}" onclick="navigate('channel',${ch.id})">${ch.name[0]}<button class="compare-remove" onclick="event.stopPropagation();toggleCompare(${ch.id})">×</button></div><span style="font-size:12px;font-weight:600;color:var(--text);cursor:pointer" onclick="navigate('channel',${ch.id})">${ch.name}</span></div></th>`).join('')}</tr></thead><tbody>
+  <tr><td style="font-size:13px;font-weight:500;color:var(--text2)">📈 График</td>${chs.map(ch=>`<td><div style="display:flex;justify-content:center">${makeSvgSpark(ch.history,'subscribers','#8b5cf6',120,40)}</div></td>`).join('')}</tr>
+  ${metrics.map(m=>{const b=best(m.k);return `<tr><td><div class="metric-cell">${m.i}<span style="font-size:13px;font-weight:500;color:var(--text2)">${m.l}</span></div></td>${chs.map(ch=>{const v=ch[m.k];const isB=v===b&&chs.length>1;return `<td><span style="font-size:13px;font-weight:700;color:${isB?'var(--emerald)':m.g?'var(--violet)':'var(--text)'}">${m.f(v)}</span>${isB?'<span class="best-badge">лучший</span>':''}</td>`;}).join('')}</tr>`;}).join('')}
+  </tbody></table></div></div></div>`;
+}
+
+function renderFavoritesPage() {
+  const chs = channels.filter(c=>state.favs.includes(c.id));
+  if(!chs.length) return `<div class="detail-bar"><div class="container"><div class="detail-bar-inner"><button class="back-btn" onclick="navigate('home')">${icons.back} Назад</button><span style="font-size:13px;font-weight:600;color:var(--text)">❤️ Избранное</span></div></div></div><div class="fav-empty"><div style="text-align:center"><div class="fav-empty-icon" style="background:rgba(236,72,153,.1);color:var(--pink)">${icons.heartFill}</div><div class="empty-title">Нет избранных каналов</div><div class="empty-desc">Нажмите ❤️ на карточке канала, чтобы добавить в избранное</div><button class="primary-btn" onclick="navigate('home')">Вернуться к каталогу</button></div></div>`;
+
+  return `<div class="detail-bar"><div class="container"><div class="detail-bar-inner"><button class="back-btn" onclick="navigate('home')">${icons.back} Назад</button><span style="font-size:13px;font-weight:600;color:var(--text)">❤️ Избранное (${chs.length})</span></div></div></div>
+  <div class="container main-content" style="padding-top:24px;max-width:960px"><h1 style="text-align:center;font-size:24px;font-weight:800;color:var(--text);margin-bottom:24px">❤️ Избранные каналы</h1>
+  <div class="channel-grid">${chs.map((c,i)=>renderChannelCard(c,i+1)).join('')}</div></div>`;
+}
+
+function renderFooter() {
+  return `<footer class="footer"><div class="container"><div class="footer-inner">
+    <div class="footer-brand"><div class="logo" onclick="navigate('home')">${logoSvg}<div><span style="font-weight:800;color:var(--text)"><span style="background:linear-gradient(135deg,#8b5cf6,#3b82f6);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Max</span>Metric</span><div style="font-size:11px;color:var(--text4)">Аналитика каналов MAX</div></div></div><p>Самый полный каталог каналов мессенджера MAX. Рейтинги, графики роста, сравнение каналов.</p><div style="display:flex;gap:8px;margin-top:12px"><span style="font-size:10px;padding:3px 8px;border-radius:10px;background:rgba(16,185,129,.1);color:var(--emerald);font-weight:600">🟢 Online</span><span style="font-size:10px;padding:3px 8px;border-radius:10px;background:var(--bg3);color:var(--text4)">v2.0</span></div></div>
+    <div class="footer-col"><h4>Категории</h4>${categories.filter(c=>c.id!=='all').slice(0,7).map(c=>`<button onclick="navigate('category','${c.id}')">${c.icon} ${c.name}</button>`).join('')}</div>
+    <div class="footer-col"><h4>Ещё категории</h4>${categories.filter(c=>c.id!=='all').slice(7).map(c=>`<button onclick="navigate('category','${c.id}')">${c.icon} ${c.name}</button>`).join('')}</div>
+    <div class="footer-col"><h4>Инструменты</h4><button onclick="navigate('top','subscribers')">🏆 Рейтинг каналов</button><button onclick="navigate('top','views')">👁 Топ по просмотрам</button><button onclick="navigate('top','growthDay')">📈 Топ по приросту</button><button onclick="navigate('compare')">⚖️ Сравнение каналов</button><button onclick="navigate('favorites')">❤️ Избранное</button></div>
+  </div><div class="footer-bottom"><span>© 2025 MaxMetric. Все права защищены.</span><span>Данные обновляются каждый час • ${channels.length} каналов в базе</span></div></div></footer>`;
+}
+
+function renderBottomNav() {
+  return `<div class="bottom-nav">
+    <button class="bnav-btn" onclick="navigate('home')">${icons.home}<span>Главная</span></button>
+    <button class="bnav-btn" onclick="navigate('top','subscribers')">${icons.trending}<span>Рейтинг</span></button>
+    <button class="bnav-center" onclick="state.showModal=true;render()">${icons.plus}</button>
+    <button class="bnav-btn" onclick="navigate('compare')">${icons.compare}<span>Сравнить</span>${state.compare.length?`<span class="bnav-badge" style="background:var(--violet)">${state.compare.length}</span>`:''}</button>
+    <button class="bnav-btn" onclick="navigate('favorites')">${icons.heart}<span>Избранное</span>${state.favs.length?`<span class="bnav-badge" style="background:var(--pink)">${state.favs.length}</span>`:''}</button>
+  </div>`;
+}
+
+function renderAddModal() {
+  return `<div class="modal-overlay" onclick="state.showModal=false;render()"><div class="modal-backdrop"></div><div class="modal-content" onclick="event.stopPropagation()"><div class="modal-bar"></div><div class="modal-body" id="modal-body">
+    <div class="modal-header"><div><div class="modal-title">Добавить канал</div><div class="modal-subtitle">Отправьте ваш канал на модерацию</div></div><button class="icon-btn" onclick="state.showModal=false;render()">${icons.x}</button></div>
+    <form onsubmit="handleAddSubmit(event)">
+      <div class="form-group"><label class="form-label">Название канала <span class="req">*</span></label><input class="form-input" name="name" placeholder="MAX Новости" required /></div>
+      <div class="form-group"><label class="form-label">Username <span class="req">*</span></label><input class="form-input" name="username" placeholder="@mychannel" required /></div>
+      <div class="form-group"><label class="form-label">Ссылка на канал</label><input class="form-input" name="url" placeholder="https://max.me/mychannel" /></div>
+      <div class="form-group"><label class="form-label">Категория <span class="req">*</span></label><select class="form-select" name="category" required><option value="">Выберите категорию</option>${categories.filter(c=>c.id!=='all').map(c=>`<option value="${c.id}">${c.icon} ${c.name}</option>`).join('')}</select></div>
+      <div class="form-group"><label class="form-label">Описание <span class="req">*</span></label><textarea class="form-textarea" name="description" placeholder="Расскажите о вашем канале подробно..." required minlength="20"></textarea></div>
+      <div class="form-note">📋 После отправки заявки наши модераторы проверят канал на соответствие правилам каталога. Модерация обычно занимает 1-2 рабочих дня.</div>
+      <button type="submit" class="submit-btn">Отправить на модерацию</button>
+    </form>
+  </div></div></div>`;
+}
+
+function handleAddSubmit(e) {
+  e.preventDefault();
+  const body = document.getElementById('modal-body');
+  body.innerHTML = `<div class="success-state"><div class="success-icon grad-emerald" style="color:#fff">${icons.check}</div><div class="empty-title">Заявка отправлена!</div><div class="empty-desc">Ваш канал будет проверен модераторами</div><div style="font-size:12px;color:var(--text4)">Обычно модерация занимает 1-2 рабочих дня</div><div class="progress-bar"><div class="progress-fill"></div></div></div>`;
+  setTimeout(()=>{state.showModal=false;render();},2500);
+}
+
+function renderShareModal() {
+  return `<div class="modal-overlay" onclick="state.showShare=false;render()"><div class="modal-backdrop"></div><div class="modal-content" style="max-width:400px" onclick="event.stopPropagation()"><div class="modal-bar"></div><div class="modal-body">
+    <div class="modal-header"><div class="modal-title">Поделиться</div><button class="icon-btn" onclick="state.showShare=false;render()">${icons.x}</button></div>
+    <div class="share-link-row"><input type="text" readonly value="${state.shareLink}" id="share-input" /><button class="share-copy-btn" id="share-copy" onclick="copyShareLink()">${icons.copy}</button></div>
+    <div id="copy-feedback"></div>
+  </div></div></div>`;
+}
+
+function copyShareLink() {
+  const input = document.getElementById('share-input');
+  if(input) { navigator.clipboard.writeText(input.value).catch(()=>{}); }
+  const btn = document.getElementById('share-copy');
+  if(btn){btn.className='share-copy-btn copied';btn.innerHTML=icons.check;}
+  const fb = document.getElementById('copy-feedback');
+  if(fb){fb.innerHTML='<div class="copy-msg">Скопировано!</div>';}
+  setTimeout(()=>{if(btn){btn.className='share-copy-btn';btn.innerHTML=icons.copy;}if(fb)fb.innerHTML='';},2000);
+}
+
+function bindEvents() {
+  // Close notif dropdown on outside click
+  document.addEventListener('click', function handler(e) {
+    if(state.showNotif && !e.target.closest('.notif-dropdown') && !e.target.closest('.icon-btn')) {
+      state.showNotif=false; render();
+    }
+    document.removeEventListener('click', handler);
+  });
+}
+
+// Init
+render();
+</script>
+</body>
 </html>
