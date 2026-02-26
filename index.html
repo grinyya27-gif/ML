@@ -62,12 +62,17 @@ input,select,textarea { font-family:inherit; }
 .nav-badge { position:absolute; top:-2px; right:-2px; min-width:16px; height:16px; border-radius:8px; font-size:9px; font-weight:700; display:flex; align-items:center; justify-content:center; color:#fff; padding:0 4px; }
 .nav-badge.violet { background:var(--violet); }
 .nav-badge.pink { background:var(--pink); }
-.header-search { display:none; flex:1; max-width:260px; margin:0 16px; position:relative; }
-@media(min-width:768px) { .header-search { display:flex; } }
-.header-search input { width:100%; padding:8px 16px 8px 36px; border-radius:12px; background:var(--bg3); border:1px solid var(--border); font-size:13px; color:var(--text); outline:none; transition:all .2s; }
-.header-search input:focus { border-color:rgba(139,92,246,.5); box-shadow:0 0 0 3px rgba(139,92,246,.1); }
+/* Header search — always visible, grows to fill space */
+.header-search { flex:1; max-width:480px; margin:0 20px; position:relative; display:flex; }
+.header-search input { width:100%; padding:9px 38px 9px 38px; border-radius:12px; background:var(--bg3); border:1px solid var(--border); font-size:13px; color:var(--text); outline:none; transition:all .2s; }
+.header-search input:focus { border-color:rgba(139,92,246,.5); box-shadow:0 0 0 3px rgba(139,92,246,.1); background:var(--bg2); }
 .header-search input::placeholder { color:var(--text4); }
-.header-search svg { position:absolute; left:10px; top:50%; transform:translateY(-50%); color:var(--text4); }
+.header-search .hs-icon { position:absolute; left:11px; top:50%; transform:translateY(-50%); color:var(--text4); pointer-events:none; transition:color .2s; }
+.header-search input:focus ~ .hs-icon, .header-search:focus-within .hs-icon { color:var(--violet); }
+.header-search .hs-clear { position:absolute; right:10px; top:50%; transform:translateY(-50%); color:var(--text4); padding:2px; border-radius:6px; transition:color .2s; }
+.header-search .hs-clear:hover { color:var(--text); }
+/* Mobile: shrink search */
+@media(max-width:600px) { .header-search { margin:0 10px; max-width:none; } }
 .header-actions { display:flex; align-items:center; gap:6px; }
 .icon-btn { padding:8px; border-radius:12px; background:var(--bg3); border:1px solid var(--border); color:var(--text3); transition:all .2s; position:relative; display:flex; align-items:center; justify-content:center; }
 .icon-btn:hover { color:var(--violet); border-color:rgba(139,92,246,.3); }
@@ -80,7 +85,7 @@ input,select,textarea { font-family:inherit; }
 .notif-dropdown { position:absolute; right:0; top:calc(100% + 8px); width:320px; border-radius:16px; background:var(--bg2); border:1px solid var(--border); box-shadow:0 20px 60px rgba(0,0,0,.15); overflow:hidden; z-index:100; }
 .dark .notif-dropdown { background:#12122a; box-shadow:0 20px 60px rgba(0,0,0,.5); }
 .notif-header { padding:12px 16px; border-bottom:1px solid var(--border2); display:flex; align-items:center; justify-content:between; }
-.notif-item { padding:12px 16px; border-bottom:1px solid var(--border2); display:flex; gap:10px; transition:background .15s; cursor:pointer; }
+.notif-item { padding:8px 12px; border-radius:10px; display:flex; gap:10px; transition:background .15s; cursor:pointer; border:none; background:none; font-family:inherit; }
 .notif-item:hover { background:var(--bg3); }
 .notif-item.unread { background:rgba(139,92,246,.03); }
 .dark .notif-item.unread { background:rgba(139,92,246,.05); }
@@ -98,25 +103,51 @@ input,select,textarea { font-family:inherit; }
 @media(min-width:640px) { .hero h2 { font-size:40px; } }
 .hero h2 span { background:linear-gradient(90deg,#67e8f9,#c4b5fd,#93c5fd); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
 .hero p { color:rgba(255,255,255,.6); font-size:14px; margin-bottom:32px; max-width:500px; margin-left:auto; margin-right:auto; }
-.hero-search { position:relative; max-width:560px; margin:0 auto 20px; }
-.hero-search input { width:100%; padding:16px 20px 16px 48px; border-radius:16px; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.2); color:#fff; font-size:14px; outline:none; backdrop-filter:blur(8px); transition:all .2s; }
-.hero-search input::placeholder { color:rgba(255,255,255,.4); }
-.hero-search input:focus { background:rgba(255,255,255,.15); border-color:rgba(255,255,255,.3); box-shadow:0 0 0 4px rgba(255,255,255,.1); }
-.hero-search svg { position:absolute; left:16px; top:50%; transform:translateY(-50%); color:rgba(255,255,255,.4); }
+
 .hero-tags { display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin-bottom:24px; }
 .hero-tag { padding:6px 14px; border-radius:20px; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.1); color:rgba(255,255,255,.7); font-size:12px; transition:all .2s; cursor:pointer; display:flex; align-items:center; gap:5px; }
 .hero-tag:hover { background:rgba(255,255,255,.2); color:#fff; }
 .hero-actions { display:flex; flex-wrap:wrap; justify-content:center; gap:10px; }
-.hero-action-btn { display:flex; align-items:center; gap:8px; padding:10px 20px; border-radius:12px; font-size:13px; font-weight:600; transition:all .2s; }
-.hero-action-btn.glass { background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.2); color:#fff; backdrop-filter:blur(8px); }
-.hero-action-btn.glass:hover { background:rgba(255,255,255,.25); }
-.hero-action-btn.solid { background:#fff; color:#7c3aed; }
-.hero-action-btn.solid:hover { box-shadow:0 8px 25px rgba(0,0,0,.15); }
+.hero-add-btn { display:inline-flex; align-items:center; gap:10px; padding:14px 32px; border-radius:16px; font-size:15px; font-weight:700; background:rgba(255,255,255,0.15); color:#fff; border:1px solid rgba(255,255,255,0.3); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); transition:all .3s; box-shadow:0 4px 20px rgba(0,0,0,.1); letter-spacing:.2px; }
+.hero-add-btn:hover { background:rgba(255,255,255,0.25); border-color:rgba(255,255,255,0.5); transform:scale(1.04); box-shadow:0 8px 32px rgba(0,0,0,.15); }
 
-/* Stats Bar */
-.stats-bar { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-bottom:32px; }
-@media(min-width:640px) { .stats-bar { grid-template-columns:repeat(3,1fr); } }
-@media(min-width:1024px) { .stats-bar { grid-template-columns:repeat(6,1fr); } }
+
+/* Ad Slider */
+.ad-slider-section { margin:24px 0 28px; }
+.ad-slider-outer { position:relative; }
+.ad-slider-wrap { overflow:hidden; border-radius:16px; }
+.ad-slider-track { display:flex; gap:12px; transition:transform .55s cubic-bezier(.4,0,.2,1); will-change:transform; }
+.ad-card { flex:0 0 calc(25% - 9px); min-width:calc(25% - 9px); border-radius:16px; border:1px solid var(--border); background:var(--bg2); overflow:hidden; cursor:pointer; transition:all .3s; position:relative; display:flex; flex-direction:column; }
+.ad-card:hover { border-color:rgba(139,92,246,.35); transform:translateY(-2px); box-shadow:0 12px 40px rgba(0,0,0,.12); }
+.dark .ad-card:hover { box-shadow:0 12px 40px rgba(0,0,0,.4); }
+.ad-card-banner { height:90px; position:relative; overflow:hidden; flex-shrink:0; }
+.ad-card-banner-img { width:100%; height:100%; object-fit:cover; }
+.ad-card-body { padding:12px 14px 14px; flex:1; display:flex; flex-direction:column; }
+.ad-card-title { font-size:13px; font-weight:700; color:var(--text); line-height:1.35; margin-bottom:5px; }
+.ad-card-desc { font-size:11px; color:var(--text3); line-height:1.5; flex:1; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.ad-card-footer { display:flex; align-items:center; justify-content:space-between; margin-top:10px; }
+.ad-card-cta { font-size:11px; font-weight:600; padding:5px 12px; border-radius:8px; transition:all .2s; }
+.ad-card-meta { font-size:10px; color:var(--text4); }
+/* Dots + nav row */
+.ad-slider-bottom { display:flex; align-items:center; justify-content:center; gap:10px; margin-top:12px; }
+.ad-slider-dots { display:flex; align-items:center; gap:6px; }
+.ad-dot { width:6px; height:6px; border-radius:3px; background:var(--border); transition:all .3s; cursor:pointer; }
+.ad-dot.active { width:18px; background:var(--violet); }
+/* Desktop arrows — sit outside the wrap, vertically centred on it */
+.ad-slider-nav { position:absolute; top:50%; transform:translateY(-50%); width:30px; height:30px; border-radius:50%; background:var(--bg2); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; color:var(--text3); transition:all .2s; z-index:5; box-shadow:0 2px 8px rgba(0,0,0,.1); }
+.ad-slider-nav:hover { background:var(--violet); border-color:var(--violet); color:#fff; box-shadow:0 4px 14px rgba(139,92,246,.35); }
+.ad-slider-prev { left:-16px; }
+.ad-slider-next { right:-16px; }
+/* Mobile: hide arrows, show only dots */
+@media(max-width:767px) {
+  .ad-card { flex:0 0 calc(50% - 6px); min-width:calc(50% - 6px); }
+  .ad-slider-nav { display:none; }
+}
+@media(max-width:479px) {
+  .ad-card { flex:0 0 calc(85% - 6px); min-width:calc(85% - 6px); }
+}
+
+/* Stats Bar (legacy for detail pages) */
 .stat-card { position:relative; border-radius:16px; background:var(--bg2); border:1px solid var(--border); padding:16px; overflow:hidden; transition:all .3s; }
 .stat-card:hover { border-color:rgba(139,92,246,.2); }
 .stat-card .deco { position:absolute; top:0; right:0; width:60px; height:60px; border-bottom-left-radius:32px; opacity:.06; transition:opacity .3s; }
@@ -124,6 +155,8 @@ input,select,textarea { font-family:inherit; }
 .stat-icon { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; color:#fff; margin-bottom:12px; box-shadow:0 4px 12px rgba(0,0,0,.15); }
 .stat-val { font-size:20px; font-weight:800; color:var(--text); }
 .stat-label { font-size:10px; color:var(--text4); margin-top:2px; }
+
+/* Channels Counter - removed */
 
 /* Card */
 .card { border-radius:16px; background:var(--bg2); border:1px solid var(--border); box-shadow:var(--card-shadow); transition:all .3s; overflow:hidden; }
@@ -448,9 +481,65 @@ input,select,textarea { font-family:inherit; }
 /* Pulse animation for notifications */
 @keyframes pulseDot { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.3);opacity:.8} }
 .pulse-dot { animation:pulseDot 2s ease-in-out infinite; }
+
+/* Auth modal tabs */
+.auth-tabs { display:flex; background:var(--bg3); border-radius:12px; padding:3px; margin-bottom:20px; border:1px solid var(--border); }
+.auth-tab { flex:1; padding:9px; border-radius:9px; font-size:13px; font-weight:600; color:var(--text3); transition:all .2s; text-align:center; }
+.auth-tab.active { background:var(--bg2); color:var(--violet); box-shadow:0 1px 3px rgba(0,0,0,.08); }
+.dark .auth-tab.active { background:rgba(139,92,246,.2); }
+
+/* Auth input with icon */
+.auth-input-wrap { position:relative; }
+.auth-input-wrap svg { position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text4); pointer-events:none; width:15px; height:15px; }
+.auth-input-wrap .form-input { padding-left:38px; }
+.auth-input-wrap .eye-btn { position:absolute; right:10px; top:50%; transform:translateY(-50%); color:var(--text4); transition:color .2s; padding:4px; }
+.auth-input-wrap .eye-btn:hover { color:var(--text); }
+
+/* Auth divider */
+.auth-divider { display:flex; align-items:center; gap:12px; margin:16px 0; }
+.auth-divider::before,.auth-divider::after { content:''; flex:1; height:1px; background:var(--border); }
+.auth-divider span { font-size:11px; color:var(--text4); white-space:nowrap; }
+
+/* Auth social */
+.auth-social-btn { display:flex; align-items:center; justify-content:center; gap:8px; width:100%; padding:11px; border-radius:12px; background:var(--bg3); border:1px solid var(--border); font-size:13px; font-weight:500; color:var(--text2); transition:all .2s; margin-bottom:8px; }
+.auth-social-btn:hover { border-color:rgba(139,92,246,.3); background:var(--bg2); }
+
+/* Profile page */
+.profile-hero { border-radius:24px; overflow:hidden; margin-bottom:24px; position:relative; }
+.profile-hero-bg { height:140px; background:linear-gradient(135deg,#7c3aed,#6d28d9,#3b82f6); position:relative; }
+.profile-hero-pattern { position:absolute; inset:0; background-image:radial-gradient(rgba(255,255,255,.08) 1px,transparent 1px); background-size:20px 20px; }
+.profile-avatar-wrap { position:relative; margin:-48px 0 0 28px; }
+.profile-big-avatar { width:96px; height:96px; border-radius:24px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:36px; font-weight:800; box-shadow:0 8px 24px rgba(0,0,0,.2); border:4px solid var(--bg2); }
+.profile-info { padding:0 28px 24px; }
+.profile-name { font-size:22px; font-weight:800; color:var(--text); margin-top:12px; }
+.profile-email { font-size:13px; color:var(--text4); margin-top:4px; display:flex; align-items:center; gap:6px; }
+.profile-badge { display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600; margin-top:10px; }
+
+/* Profile stats row */
+.profile-stats-row { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:24px; }
+.profile-stat-card { border-radius:16px; background:var(--bg2); border:1px solid var(--border); padding:16px; text-align:center; transition:all .2s; cursor:pointer; }
+.profile-stat-card:hover { border-color:rgba(139,92,246,.3); transform:translateY(-1px); }
+.profile-stat-num { font-size:26px; font-weight:800; margin-bottom:4px; }
+.profile-stat-label { font-size:11px; color:var(--text4); }
+
+/* Profile sections */
+.profile-section { border-radius:16px; background:var(--bg2); border:1px solid var(--border); margin-bottom:16px; overflow:hidden; }
+.profile-section-header { padding:16px 20px; border-bottom:1px solid var(--border2); display:flex; align-items:center; justify-content:space-between; }
+.profile-section-title { font-size:14px; font-weight:700; color:var(--text); display:flex; align-items:center; gap:8px; }
+.profile-section-body { padding:16px 20px; }
+
+/* Settings form */
+.settings-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+@media(max-width:640px) { .settings-row { grid-template-columns:1fr; } }
+.settings-save-btn { display:flex; align-items:center; gap:6px; padding:10px 20px; border-radius:12px; background:linear-gradient(135deg,#7c3aed,#3b82f6); color:#fff; font-size:13px; font-weight:600; transition:all .2s; }
+.settings-save-btn:hover { box-shadow:0 6px 20px rgba(139,92,246,.3); transform:scale(1.02); }
+
+/* Danger zone */
+.danger-btn { display:flex; align-items:center; gap:6px; padding:9px 16px; border-radius:12px; border:1px solid rgba(239,68,68,.3); background:rgba(239,68,68,.05); color:var(--red); font-size:13px; font-weight:500; transition:all .2s; }
+.danger-btn:hover { background:rgba(239,68,68,.1); border-color:var(--red); }
 </style>
 </head>
-<body class="dark">
+<body>
 <div id="app"></div>
 <script type="module" src="/src/main.tsx"></script>
 <script>
@@ -561,11 +650,43 @@ function makeChart(data, key, color, gradId, title, height) {
   </svg>`;
 }
 
+// ========== AUTH STATE ==========
+let authUsers = JSON.parse(localStorage.getItem('mm_users')||'[]');
+let currentUser = JSON.parse(localStorage.getItem('mm_current')||'null');
+
+function saveUsers() { localStorage.setItem('mm_users',JSON.stringify(authUsers)); }
+function saveCurrentUser() { localStorage.setItem('mm_current',JSON.stringify(currentUser)); }
+
+function authRegister(name, email, password) {
+  if(authUsers.find(u=>u.email===email)) return {ok:false,err:'Пользователь с таким email уже существует'};
+  const user = {id:Date.now(),name,email,password:btoa(password),avatar:'grad-violet',createdAt:new Date().toISOString(),plan:'Бесплатный'};
+  authUsers.push(user);
+  saveUsers();
+  currentUser = user;
+  saveCurrentUser();
+  return {ok:true};
+}
+
+function authLogin(email, password) {
+  const u = authUsers.find(u=>u.email===email && u.password===btoa(password));
+  if(!u) return {ok:false,err:'Неверный email или пароль'};
+  currentUser = u;
+  saveCurrentUser();
+  return {ok:true};
+}
+
+function authLogout() {
+  currentUser = null;
+  localStorage.removeItem('mm_current');
+}
+
 // ========== STATE ==========
 let state = {
   page:'home', channelId:null, topSort:'subscribers',
   search:'', category:'all', sortBy:'subscribers', timePeriod:'day', verifiedOnly:false,
-  theme:'dark', showModal:false, showNotif:false, showShare:false, shareLink:'',
+  theme:localStorage.getItem('mm_theme')||'light', showModal:false, showNotif:false, showShare:false, shareLink:'',
+  showProfile:false,
+  showAuthModal:false, authTab:'login', authError:'', authShowPass:false,
   favs: JSON.parse(localStorage.getItem('mm_favs')||'[]'),
   compare: [], recent: JSON.parse(localStorage.getItem('mm_recent')||'[]'),
   mobileMenu:false
@@ -578,12 +699,16 @@ function toggleCompare(id) { state.compare.includes(id)?state.compare=state.comp
 function addRecent(id) { state.recent=[id,...state.recent.filter(x=>x!==id)].slice(0,10); saveRecent(); }
 
 function navigate(page, data) {
-  state.mobileMenu=false; state.showNotif=false;
+  state.mobileMenu=false; state.showNotif=false; state.showProfile=false;
   if(page==='home'){state.page='home';}
   else if(page==='channel'){state.page='channel';state.channelId=data;addRecent(data);}
   else if(page==='top'){state.page='top';state.topSort=data||'subscribers';}
   else if(page==='compare'){state.page='compare';}
   else if(page==='favorites'){state.page='favorites';}
+  else if(page==='profile'){
+    if(!currentUser){state.showAuthModal=true;render();return;}
+    state.page='profile';
+  }
   else if(page==='category'){state.category=data;state.page='home';}
   window.scrollTo({top:0,behavior:'smooth'});
   render();
@@ -634,6 +759,9 @@ const icons = {
   badge:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m9 12 2 2 4-4"/></svg>',
   zap:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
   hash:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="9" y2="9"/><line x1="4" x2="20" y1="15" y2="15"/><line x1="10" x2="8" y1="3" y2="21"/><line x1="16" x2="14" y1="3" y2="21"/></svg>',
+  user:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>',
+  settings:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>',
+  logout:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>',
 };
 
 const logoSvg = `<svg width="36" height="36" viewBox="0 0 36 36" fill="none" class="logo-icon"><defs><linearGradient id="lBg" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#8b5cf6"/><stop offset="50%" stop-color="#7c3aed"/><stop offset="100%" stop-color="#3b82f6"/></linearGradient></defs><rect width="36" height="36" rx="10" fill="url(#lBg)"/><line x1="6" y1="26" x2="30" y2="26" stroke="white" stroke-opacity=".1" stroke-width=".5"/><line x1="6" y1="20" x2="30" y2="20" stroke="white" stroke-opacity=".07" stroke-width=".5"/><polyline points="7,24 13,19 18,21 23,13 29,9" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="29" cy="9" r="2.5" fill="white"/><circle cx="29" cy="9" r="1.2" fill="#3b82f6"/><rect x="8" y="27" width="3" height="3" rx=".8" fill="white" fill-opacity=".2"/><rect x="13" y="25" width="3" height="5" rx=".8" fill="white" fill-opacity=".25"/><rect x="18" y="26" width="3" height="4" rx=".8" fill="white" fill-opacity=".2"/><rect x="23" y="24" width="3" height="6" rx=".8" fill="white" fill-opacity=".3"/></svg>`;
@@ -641,6 +769,7 @@ const logoSvg = `<svg width="36" height="36" viewBox="0 0 36 36" fill="none" cla
 // ========== RENDER ==========
 function render() {
   document.body.className = state.theme;
+  localStorage.setItem('mm_theme', state.theme);
   const app = document.getElementById('app');
   let html = '';
   html += renderHeader();
@@ -648,34 +777,127 @@ function render() {
   else if(state.page==='top') html += renderTopPage();
   else if(state.page==='compare') html += renderComparePage();
   else if(state.page==='favorites') html += renderFavoritesPage();
+  else if(state.page==='profile') html += renderProfilePage();
   else html += renderHomePage();
   html += renderFooter();
   html += renderBottomNav();
   if(state.showModal) html += renderAddModal();
   if(state.showShare) html += renderShareModal();
+  if(state.showAuthModal) html += renderAuthModal();
   app.innerHTML = html;
   bindEvents();
 }
 
 function renderHeader() {
-  const unread = 3;
+  const themeIcon = state.theme === 'dark'
+    ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`
+    : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
+
   return `<header class="header"><div class="container"><div class="header-inner">
-    <div class="logo" onclick="navigate('home')">${logoSvg}<div><div class="logo-text"><span>Max</span>Metric</div><div class="logo-sub">Аналитика каналов MAX</div></div></div>
-    <nav class="header-nav">
-      <button class="nav-btn" onclick="navigate('home')">${icons.home} Главная</button>
-      <button class="nav-btn" onclick="navigate('top','subscribers')">${icons.trending} Рейтинг</button>
-      <button class="nav-btn" onclick="navigate('top','growthDay')">${icons.chart} Прирост</button>
-      <button class="nav-btn" onclick="navigate('compare')">${icons.compare} Сравнение${state.compare.length?`<span class="nav-badge violet">${state.compare.length}</span>`:''}</button>
-      <button class="nav-btn" onclick="navigate('favorites')">${icons.heart} Избранное${state.favs.length?`<span class="nav-badge pink">${state.favs.length}</span>`:''}</button>
-    </nav>
-    <div class="header-search">${icons.search}<input placeholder="Поиск каналов..." value="${state.search}" oninput="state.search=this.value;if(state.page!=='home')navigate('home');else render();" />${state.search?`<button style="position:absolute;right:10px;top:50%;transform:translateY(-50%);color:var(--text4)" onclick="state.search='';render()">${icons.x}</button>`:''}</div>
-    <div class="header-actions">
-      <div style="position:relative"><button class="icon-btn" onclick="state.showNotif=!state.showNotif;render()">${icons.bell}${unread?`<span class="notif-dot">${unread}</span>`:''}</button>${state.showNotif?renderNotifDropdown():''}</div>
-      <button class="add-btn" onclick="state.showModal=true;render()"><span style="font-size:16px;line-height:1">+</span> Добавить</button>
-      <button class="icon-btn" onclick="state.theme=state.theme==='dark'?'light':'dark';render()">${state.theme==='dark'?icons.sun:icons.moon}</button>
-      <button class="icon-btn" style="display:none" id="mobile-menu-btn" onclick="state.mobileMenu=!state.mobileMenu;render()">${state.mobileMenu?icons.x:icons.menu}</button>
+
+    <!-- Логотип -->
+    <div class="logo" onclick="navigate('home')" style="flex-shrink:0">
+      ${logoSvg}
+      <div>
+        <div class="logo-text"><span>Max</span>Metric</div>
+        <div class="logo-sub">Аналитика каналов MAX</div>
+      </div>
     </div>
+
+    <!-- Поиск — растягивается -->
+    <div class="header-search">
+      <span class="hs-icon">${icons.search}</span>
+      <input
+        id="header-search-input"
+        placeholder="Поиск каналов по названию, @username или тегу..."
+        value="${state.search}"
+        oninput="headerSearchInput(this.value)"
+        onkeydown="if(event.key==='Escape'){headerSearchClear();}"
+      />
+      ${state.search ? `<button class="hs-clear" onclick="headerSearchClear()" title="Очистить">${icons.x}</button>` : ''}
+    </div>
+
+    <!-- Только переключатель темы -->
+    <div class="header-actions" style="flex-shrink:0">
+      <button
+        class="icon-btn"
+        onclick="state.theme=state.theme==='dark'?'light':'dark';render()"
+        title="${state.theme==='dark'?'Светлая тема':'Тёмная тема'}"
+        style="width:38px;height:38px"
+      >${themeIcon}</button>
+    </div>
+
   </div></div></header>`;
+}
+
+function headerSearchInput(val) {
+  state.search = val;
+  if(state.page !== 'home') {
+    state.category = 'all';
+    state.page = 'home';
+  }
+  render();
+  // Restore focus after re-render
+  const inp = document.getElementById('header-search-input');
+  if(inp) { inp.focus(); inp.setSelectionRange(val.length, val.length); }
+}
+
+function headerSearchClear() {
+  state.search = '';
+  render();
+  const inp = document.getElementById('header-search-input');
+  if(inp) inp.focus();
+}
+
+function renderProfileDropdown() {
+  const myFavs = state.favs.length;
+  const myCmp = state.compare.length;
+  const myRecent = state.recent.length;
+  return `<div class="notif-dropdown" onclick="event.stopPropagation()" style="width:280px">
+    <div style="padding:16px;border-bottom:1px solid var(--border2)">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#8b5cf6,#3b82f6);display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;font-weight:700">А</div>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:var(--text)">Аноним</div>
+          <div style="font-size:11px;color:var(--text4);margin-top:2px">Гость • Бесплатный план</div>
+        </div>
+      </div>
+    </div>
+    <div style="padding:8px">
+      <div style="padding:4px 8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text4);margin-bottom:4px">Моя статистика</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px;padding:0 4px">
+        <div style="text-align:center;padding:8px 4px;border-radius:10px;background:var(--bg3)">
+          <div style="font-size:16px;font-weight:800;color:var(--pink)">${myFavs}</div>
+          <div style="font-size:9px;color:var(--text4);margin-top:2px">избранных</div>
+        </div>
+        <div style="text-align:center;padding:8px 4px;border-radius:10px;background:var(--bg3)">
+          <div style="font-size:16px;font-weight:800;color:var(--violet)">${myCmp}</div>
+          <div style="font-size:9px;color:var(--text4);margin-top:2px">в сравнении</div>
+        </div>
+        <div style="text-align:center;padding:8px 4px;border-radius:10px;background:var(--bg3)">
+          <div style="font-size:16px;font-weight:800;color:var(--blue)">${myRecent}</div>
+          <div style="font-size:9px;color:var(--text4);margin-top:2px">просмотрено</div>
+        </div>
+      </div>
+      <div style="padding:4px 8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text4);margin-bottom:4px;margin-top:4px">Меню</div>
+      <button onclick="navigate('favorites');state.showProfile=false;" class="notif-item" style="width:100%;border-radius:10px;margin-bottom:2px;display:flex;align-items:center;gap:10px;text-align:left">
+        <span style="width:28px;height:28px;border-radius:8px;background:rgba(236,72,153,.1);color:var(--pink);display:flex;align-items:center;justify-content:center">${icons.heartFill}</span>
+        <div><div style="font-size:13px;font-weight:600;color:var(--text)">Избранные каналы</div><div style="font-size:10px;color:var(--text4)">${myFavs} каналов сохранено</div></div>
+      </button>
+      <button onclick="navigate('compare');state.showProfile=false;" class="notif-item" style="width:100%;border-radius:10px;margin-bottom:2px;display:flex;align-items:center;gap:10px;text-align:left">
+        <span style="width:28px;height:28px;border-radius:8px;background:rgba(139,92,246,.1);color:var(--violet);display:flex;align-items:center;justify-content:center">${icons.compare}</span>
+        <div><div style="font-size:13px;font-weight:600;color:var(--text)">Сравнение каналов</div><div style="font-size:10px;color:var(--text4)">${myCmp} из 4 добавлено</div></div>
+      </button>
+      <button onclick="state.showModal=true;state.showProfile=false;render();" class="notif-item" style="width:100%;border-radius:10px;margin-bottom:2px;display:flex;align-items:center;gap:10px;text-align:left">
+        <span style="width:28px;height:28px;border-radius:8px;background:rgba(16,185,129,.1);color:var(--emerald);display:flex;align-items:center;justify-content:center">${icons.plus}</span>
+        <div><div style="font-size:13px;font-weight:600;color:var(--text)">Добавить канал</div><div style="font-size:10px;color:var(--text4)">Разместить в каталоге</div></div>
+      </button>
+      <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border2);display:flex;align-items:center;justify-content:space-between;padding:8px 4px 4px">
+        <button onclick="state.theme=state.theme==='dark'?'light':'dark';state.showProfile=false;render()" style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text3);padding:6px 10px;border-radius:8px;background:var(--bg3)">${state.theme==='dark'?icons.sun:icons.moon} ${state.theme==='dark'?'Светлая тема':'Тёмная тема'}</button>
+        <button onclick="state.favs=[];state.compare=[];state.recent=[];saveFavs();saveRecent();state.showProfile=false;render()" style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text4);padding:6px 10px;border-radius:8px">${icons.logout} Очистить</button>
+      </div>
+    </div>
+  </div>`;
 }
 
 function renderNotifDropdown() {
@@ -692,7 +914,7 @@ function renderHomePage() {
   const filtered = getFiltered();
   let html = '<main class="main-content"><div class="container" style="padding-top:24px">';
   html += renderHero();
-  html += renderStats();
+  html += renderAdSlider();
   if(state.recent.length>0 && !state.search && state.category==='all') html += renderRecent();
   html += renderTopChannels();
   html += renderMobileCats();
@@ -713,36 +935,131 @@ function renderHomePage() {
 }
 
 function renderHero() {
-  const tags = [{id:'news',l:'Новости',i:'📰'},{id:'tech',l:'Технологии',i:'💻'},{id:'crypto',l:'Крипто',i:'₿'},{id:'business',l:'Бизнес',i:'💼'},{id:'entertainment',l:'Развлечения',i:'🎭'},{id:'gaming',l:'Игры',i:'🎮'},{id:'science',l:'Наука',i:'🔬'}];
   return `<div class="hero"><div class="hero-bg"></div><div class="hero-pattern"></div><div class="hero-deco1"></div><div class="hero-deco2"></div>
     <svg style="position:absolute;bottom:0;left:0;right:0;height:60px;opacity:.1" viewBox="0 0 400 60" preserveAspectRatio="none"><polyline points="0,50 40,40 80,45 120,30 160,35 200,20 240,25 280,15 320,18 360,10 400,15" fill="none" stroke="white" stroke-width="1.5"/><polygon points="0,50 40,40 80,45 120,30 160,35 200,20 240,25 280,15 320,18 360,10 400,15 400,60 0,60" fill="white" fill-opacity=".05"/></svg>
     <div class="hero-content">
       <div class="hero-badge">${icons.sparkle} Каталог и аналитика каналов MAX</div>
       <h2>Аналитика каналов<br><span>мессенджера MAX</span></h2>
       <p>Рейтинги, статистика, графики роста и сравнение каналов. Всё в одном месте.</p>
-      <div class="hero-search">${icons.search}<input placeholder="Найти канал по названию, username или тегу..." value="${state.search}" oninput="state.search=this.value;render()" /></div>
-      <div class="hero-tags">${tags.map(t=>`<button class="hero-tag" onclick="state.category='${t.id}';setTimeout(()=>document.getElementById('ch-list')?.scrollIntoView({behavior:'smooth'}),100);render()"><span>${t.i}</span> ${t.l}</button>`).join('')}</div>
       <div class="hero-actions">
-        <button class="hero-action-btn glass" onclick="navigate('top','subscribers')">${icons.trending} Топ каналов</button>
-        <button class="hero-action-btn glass" onclick="navigate('top','subscribers')">${icons.users} По подписчикам</button>
-        <button class="hero-action-btn solid" onclick="navigate('top','subscribers')">${icons.zap} Быстрый старт</button>
+        <button class="hero-add-btn" onclick="state.showModal=true;render()">${icons.plus} Добавить канал</button>
       </div>
     </div></div>`;
 }
 
-function renderStats() {
-  const ts=channels.reduce((a,c)=>a+c.subscribers,0), tv=channels.reduce((a,c)=>a+c.views,0), tg=channels.reduce((a,c)=>a+c.growthDay,0);
-  const vc=channels.filter(c=>c.verified).length, ae=(channels.reduce((a,c)=>a+c.er,0)/channels.length).toFixed(1);
-  const stats = [
-    {l:'Каналов в каталоге',v:''+channels.length,icon:icons.hash,grad:'grad-blue'},
-    {l:'Подписчиков всего',v:fmt(ts),icon:icons.users,grad:'grad-violet'},
-    {l:'Просмотров всего',v:fmt(tv),icon:icons.eye,grad:'grad-emerald'},
-    {l:'Прирост за день',v:'+'+fmt(tg),icon:icons.trending,grad:'grad-orange'},
-    {l:'Верифицированных',v:''+vc,icon:icons.badge,grad:'grad-indigo'},
-    {l:'Средний ER',v:ae+'%',icon:icons.msg,grad:'grad-pink'},
+
+function renderAdSlider() {
+  // Единый формат: одинаковая структура, только градиент и акцентный цвет меняются
+  const ads = [
+    {
+      grad:'linear-gradient(135deg,#7c3aed,#4f46e5)',
+      accent:'#a78bfa',
+      accentBg:'rgba(139,92,246,.18)',
+      deco:'<circle cx="130" cy="-10" r="70" fill="rgba(255,255,255,.06)"/><circle cx="-10" cy="80" r="45" fill="rgba(255,255,255,.04)"/>',
+      icon:'📊',
+      title:'Разместите канал в топе',
+      desc:'Получите тысячи новых подписчиков с рекламным размещением в MaxMetric',
+      cta:'Подробнее',
+      meta:'от 990 ₽/мес'
+    },
+    {
+      grad:'linear-gradient(135deg,#0ea5e9,#06b6d4)',
+      accent:'#67e8f9',
+      accentBg:'rgba(6,182,212,.18)',
+      deco:'<circle cx="130" cy="-10" r="70" fill="rgba(255,255,255,.06)"/><circle cx="-10" cy="80" r="45" fill="rgba(255,255,255,.04)"/>',
+      icon:'📈',
+      title:'Расширенная аналитика',
+      desc:'Глубокая статистика, прогнозы роста и детальные отчёты для вашего канала',
+      cta:'Попробовать',
+      meta:'Бесплатно 7 дней'
+    },
+    {
+      grad:'linear-gradient(135deg,#10b981,#059669)',
+      accent:'#6ee7b7',
+      accentBg:'rgba(16,185,129,.18)',
+      deco:'<circle cx="130" cy="-10" r="70" fill="rgba(255,255,255,.06)"/><circle cx="-10" cy="80" r="45" fill="rgba(255,255,255,.04)"/>',
+      icon:'🏅',
+      title:'Верификация канала',
+      desc:'Официальный значок повышает доверие аудитории и видимость в поиске',
+      cta:'Оставить заявку',
+      meta:'Бесплатно'
+    },
+    {
+      grad:'linear-gradient(135deg,#f59e0b,#f97316)',
+      accent:'#fcd34d',
+      accentBg:'rgba(245,158,11,.18)',
+      deco:'<circle cx="130" cy="-10" r="70" fill="rgba(255,255,255,.06)"/><circle cx="-10" cy="80" r="45" fill="rgba(255,255,255,.04)"/>',
+      icon:'🤝',
+      title:'Партнёрская программа',
+      desc:'Зарабатывайте до 30% комиссии за каждого привлечённого пользователя',
+      cta:'Узнать условия',
+      meta:'до 30% комиссии'
+    },
+    {
+      grad:'linear-gradient(135deg,#ec4899,#8b5cf6)',
+      accent:'#f9a8d4',
+      accentBg:'rgba(236,72,153,.18)',
+      deco:'<circle cx="130" cy="-10" r="70" fill="rgba(255,255,255,.06)"/><circle cx="-10" cy="80" r="45" fill="rgba(255,255,255,.04)"/>',
+      icon:'👑',
+      title:'Premium-аккаунт',
+      desc:'Неограниченная аналитика, приоритетная поддержка и эксклюзивные инструменты',
+      cta:'Оформить',
+      meta:'от 1 490 ₽/мес'
+    },
+    {
+      grad:'linear-gradient(135deg,#6366f1,#3b82f6)',
+      accent:'#93c5fd',
+      accentBg:'rgba(59,130,246,.18)',
+      deco:'<circle cx="130" cy="-10" r="70" fill="rgba(255,255,255,.06)"/><circle cx="-10" cy="80" r="45" fill="rgba(255,255,255,.04)"/>',
+      icon:'📲',
+      title:'Приложение MaxMetric',
+      desc:'Следите за статистикой каналов в реальном времени прямо со смартфона',
+      cta:'Скачать',
+      meta:'iOS и Android'
+    }
   ];
-  return `<div class="stats-bar">${stats.map(s=>`<div class="stat-card"><div class="deco ${s.grad}"></div><div class="stat-icon ${s.grad}">${s.icon}</div><div class="stat-val">${s.v}</div><div class="stat-label">${s.l}</div></div>`).join('')}</div>`;
+
+  const cards = ads.map((ad,i) => `
+    <div class="ad-card" onclick="handleAdClick(${i})">
+      <div class="ad-card-banner" style="background:${ad.grad}">
+        <svg style="position:absolute;inset:0;width:100%;height:100%" viewBox="0 0 150 90" preserveAspectRatio="xMidYMid slice">${ad.deco}</svg>
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:34px;filter:drop-shadow(0 2px 8px rgba(0,0,0,.2))">${ad.icon}</div>
+      </div>
+      <div class="ad-card-body">
+        <div class="ad-card-title">${ad.title}</div>
+        <div class="ad-card-desc">${ad.desc}</div>
+        <div class="ad-card-footer">
+          <button class="ad-card-cta" style="background:${ad.accentBg};color:${ad.accent}">${ad.cta} →</button>
+          <span class="ad-card-meta">${ad.meta}</span>
+        </div>
+      </div>
+    </div>`).join('');
+
+  return `<div class="ad-slider-section">
+    <div class="ad-slider-outer">
+      <div class="ad-slider-wrap" id="ad-wrap">
+        <div class="ad-slider-track" id="ad-track">${cards}</div>
+      </div>
+      <button class="ad-slider-nav ad-slider-prev" id="ad-prev" onclick="adSliderPrev()" aria-label="Назад">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="m15 18-6-6 6-6"/></svg>
+      </button>
+      <button class="ad-slider-nav ad-slider-next" id="ad-next" onclick="adSliderNext()" aria-label="Вперёд">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="m9 18 6-6-6-6"/></svg>
+      </button>
+    </div>
+    <div class="ad-slider-bottom">
+      <div class="ad-slider-dots" id="ad-dots">
+        ${ads.map((_,i)=>`<div class="ad-dot${i===0?' active':''}" onclick="adSliderGoTo(${i})" id="ad-dot-${i}"></div>`).join('')}
+      </div>
+    </div>
+  </div>`;
 }
+
+function handleAdClick(i) {
+  // placeholder — можно добавить переход
+}
+
+// stats removed
 
 function renderRecent() {
   const rc = state.recent.map(id=>channels.find(c=>c.id===id)).filter(Boolean).slice(0,6);
@@ -944,8 +1261,11 @@ function renderBottomNav() {
     <button class="bnav-btn" onclick="navigate('home')">${icons.home}<span>Главная</span></button>
     <button class="bnav-btn" onclick="navigate('top','subscribers')">${icons.trending}<span>Рейтинг</span></button>
     <button class="bnav-center" onclick="state.showModal=true;render()">${icons.plus}</button>
-    <button class="bnav-btn" onclick="navigate('compare')">${icons.compare}<span>Сравнить</span>${state.compare.length?`<span class="bnav-badge" style="background:var(--violet)">${state.compare.length}</span>`:''}</button>
     <button class="bnav-btn" onclick="navigate('favorites')">${icons.heart}<span>Избранное</span>${state.favs.length?`<span class="bnav-badge" style="background:var(--pink)">${state.favs.length}</span>`:''}</button>
+    <button class="bnav-btn" onclick="${currentUser?`navigate('profile')`:`state.showAuthModal=true;state.authTab='login';state.authError='';render()`}" style="${state.page==='profile'?'color:var(--violet)':''}">
+      ${currentUser ? `<div style="width:20px;height:20px;border-radius:6px;background:linear-gradient(135deg,#8b5cf6,#3b82f6);display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:700">${currentUser.name[0].toUpperCase()}</div>` : icons.user}
+      <span>${currentUser?'Профиль':'Войти'}</span>
+    </button>
   </div>`;
 }
 
@@ -954,8 +1274,7 @@ function renderAddModal() {
     <div class="modal-header"><div><div class="modal-title">Добавить канал</div><div class="modal-subtitle">Отправьте ваш канал на модерацию</div></div><button class="icon-btn" onclick="state.showModal=false;render()">${icons.x}</button></div>
     <form onsubmit="handleAddSubmit(event)">
       <div class="form-group"><label class="form-label">Название канала <span class="req">*</span></label><input class="form-input" name="name" placeholder="MAX Новости" required /></div>
-      <div class="form-group"><label class="form-label">Username <span class="req">*</span></label><input class="form-input" name="username" placeholder="@mychannel" required /></div>
-      <div class="form-group"><label class="form-label">Ссылка на канал</label><input class="form-input" name="url" placeholder="https://max.me/mychannel" /></div>
+      <div class="form-group"><label class="form-label">Ссылка на канал <span class="req">*</span></label><input class="form-input" name="url" placeholder="https://max.me/mychannel" required /></div>
       <div class="form-group"><label class="form-label">Категория <span class="req">*</span></label><select class="form-select" name="category" required><option value="">Выберите категорию</option>${categories.filter(c=>c.id!=='all').map(c=>`<option value="${c.id}">${c.icon} ${c.name}</option>`).join('')}</select></div>
       <div class="form-group"><label class="form-label">Описание <span class="req">*</span></label><textarea class="form-textarea" name="description" placeholder="Расскажите о вашем канале подробно..." required minlength="20"></textarea></div>
       <div class="form-note">📋 После отправки заявки наши модераторы проверят канал на соответствие правилам каталога. Модерация обычно занимает 1-2 рабочих дня.</div>
@@ -989,14 +1308,362 @@ function copyShareLink() {
   setTimeout(()=>{if(btn){btn.className='share-copy-btn';btn.innerHTML=icons.copy;}if(fb)fb.innerHTML='';},2000);
 }
 
+// ========== AUTH MODAL ==========
+function renderAuthModal() {
+  const isLogin = state.authTab === 'login';
+  return `<div class="modal-overlay" onclick="state.showAuthModal=false;render()"><div class="modal-backdrop"></div><div class="modal-content" style="max-width:420px" onclick="event.stopPropagation()"><div class="modal-bar"></div><div class="modal-body">
+    <div class="modal-header"><div><div class="modal-title">${isLogin?'Добро пожаловать':'Создать аккаунт'}</div><div class="modal-subtitle">${isLogin?'Войдите в свой аккаунт MaxMetric':'Зарегистрируйтесь бесплатно'}</div></div><button class="icon-btn" onclick="state.showAuthModal=false;render()">${icons.x}</button></div>
+    <div class="auth-tabs"><button class="auth-tab ${isLogin?'active':''}" onclick="state.authTab='login';state.authError='';render()">Вход</button><button class="auth-tab ${!isLogin?'active':''}" onclick="state.authTab='register';state.authError='';render()">Регистрация</button></div>
+    ${state.authError ? `<div style="padding:10px 14px;border-radius:12px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);color:var(--red);font-size:13px;margin-bottom:14px;display:flex;align-items:center;gap:8px">⚠️ ${state.authError}</div>` : ''}
+    <form id="auth-form" onsubmit="handleAuthSubmit(event)">
+      ${!isLogin ? `<div class="form-group"><label class="form-label">Имя <span class="req">*</span></label><div class="auth-input-wrap">${icons.user}<input class="form-input" name="name" placeholder="Как вас зовут?" required minlength="2" /></div></div>` : ''}
+      <div class="form-group"><label class="form-label">Email <span class="req">*</span></label><div class="auth-input-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg><input class="form-input" name="email" type="email" placeholder="example@mail.ru" required /></div></div>
+      <div class="form-group"><label class="form-label">Пароль <span class="req">*</span></label><div class="auth-input-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><input class="form-input" name="password" type="${state.authShowPass?'text':'password'}" placeholder="${isLogin?'Введите пароль':'Минимум 6 символов'}" required minlength="6" /><button type="button" class="eye-btn" onclick="state.authShowPass=!state.authShowPass;render()">${state.authShowPass?'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>':'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>'}</button></div></div>
+      ${!isLogin ? `<div class="form-group"><label class="form-label">Повтор пароля <span class="req">*</span></label><div class="auth-input-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><input class="form-input" name="password2" type="password" placeholder="Повторите пароль" required minlength="6" /></div></div>` : ''}
+      <button type="submit" class="submit-btn" style="margin-top:4px">${isLogin?'Войти в аккаунт':'Создать аккаунт'}</button>
+    </form>
+    <div class="auth-divider"><span>или</span></div>
+    <button class="auth-social-btn" onclick="handleDemoLogin()">👤 Войти как демо-пользователь</button>
+    <p style="text-align:center;font-size:12px;color:var(--text4);margin-top:12px">${isLogin?'Нет аккаунта?':'Уже есть аккаунт?'} <button style="color:var(--violet);font-weight:600" onclick="state.authTab='${isLogin?'register':'login'}';state.authError='';render()">${isLogin?'Зарегистрироваться':'Войти'}</button></p>
+  </div></div></div>`;
+}
+
+function handleDemoLogin() {
+  // Create or find demo user
+  let demo = authUsers.find(u=>u.email==='demo@maxmetric.ru');
+  if(!demo) {
+    authRegister('Демо Пользователь','demo@maxmetric.ru','demo12345');
+  } else {
+    authLogin('demo@maxmetric.ru','demo12345');
+  }
+  state.showAuthModal=false;
+  state.page='profile';
+  render();
+}
+
+function handleAuthSubmit(e) {
+  e.preventDefault();
+  const f = e.target;
+  const isLogin = state.authTab==='login';
+  const email = f.email.value.trim();
+  const password = f.password.value;
+  if(!isLogin) {
+    const name = f.name.value.trim();
+    const p2 = f.password2.value;
+    if(password !== p2) { state.authError='Пароли не совпадают'; render(); return; }
+    const r = authRegister(name, email, password);
+    if(!r.ok) { state.authError=r.err; render(); return; }
+  } else {
+    const r = authLogin(email, password);
+    if(!r.ok) { state.authError=r.err; render(); return; }
+  }
+  state.showAuthModal=false;
+  state.authError='';
+  state.page='profile';
+  render();
+}
+
+// ========== PROFILE PAGE ==========
+function renderProfilePage() {
+  if(!currentUser) { navigate('home'); return ''; }
+  const myFavs = state.favs.length;
+  const myCmp = state.compare.length;
+  const myRecent = state.recent.length;
+  const joinDate = new Date(currentUser.createdAt).toLocaleDateString('ru-RU',{year:'numeric',month:'long',day:'numeric'});
+  const favChannels = channels.filter(c=>state.favs.includes(c.id)).slice(0,4);
+  const recentChannels = state.recent.map(id=>channels.find(c=>c.id===id)).filter(Boolean).slice(0,4);
+  
+  const avatarGrad = currentUser.avatar || 'grad-violet';
+
+  return `<div class="detail-bar"><div class="container"><div class="detail-bar-inner">
+    <button class="back-btn" onclick="navigate('home')">${icons.back} Назад к каталогу</button>
+    <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--text)">${icons.user} Личный кабинет</div>
+  </div></div></div>
+  <div class="container main-content" style="padding-top:24px;max-width:900px">
+
+    <!-- Hero card -->
+    <div class="profile-hero card">
+      <div class="profile-hero-bg"><div class="profile-hero-pattern"></div>
+        <div style="position:absolute;top:12px;right:16px;display:flex;gap:8px">
+          <button onclick="navigate('home')" style="padding:7px 14px;border-radius:10px;background:rgba(255,255,255,.15);color:#fff;font-size:12px;font-weight:600;border:1px solid rgba(255,255,255,.2);backdrop-filter:blur(8px)">← Каталог</button>
+          <button onclick="doLogout()" style="padding:7px 14px;border-radius:10px;background:rgba(239,68,68,.2);color:#fff;font-size:12px;font-weight:600;border:1px solid rgba(239,68,68,.3);backdrop-filter:blur(8px)">${icons.logout} Выйти</button>
+        </div>
+      </div>
+      <div class="profile-avatar-wrap"><div class="profile-big-avatar ${avatarGrad}">${currentUser.name[0].toUpperCase()}</div></div>
+      <div class="profile-info">
+        <div class="profile-name">${currentUser.name}</div>
+        <div class="profile-email"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>${currentUser.email}</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+          <span class="profile-badge" style="background:rgba(139,92,246,.1);color:var(--violet)">✨ ${currentUser.plan}</span>
+          <span class="profile-badge" style="background:rgba(16,185,129,.08);color:var(--emerald)">${icons.calendar} Зарегистрирован: ${joinDate}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="profile-stats-row">
+      <div class="profile-stat-card" onclick="navigate('favorites')">
+        <div class="profile-stat-num" style="color:var(--pink)">${myFavs}</div>
+        <div class="profile-stat-label">❤️ Избранных каналов</div>
+      </div>
+      <div class="profile-stat-card" onclick="navigate('compare')">
+        <div class="profile-stat-num" style="color:var(--violet)">${myCmp}</div>
+        <div class="profile-stat-label">⚖️ В сравнении</div>
+      </div>
+      <div class="profile-stat-card">
+        <div class="profile-stat-num" style="color:var(--blue)">${myRecent}</div>
+        <div class="profile-stat-label">👁 Просмотрено каналов</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+    <!-- Fav channels -->
+    <div class="profile-section">
+      <div class="profile-section-header">
+        <span class="profile-section-title">❤️ Избранные каналы</span>
+        ${myFavs>0?`<button onclick="navigate('favorites')" style="font-size:12px;color:var(--violet)">Все →</button>`:''}
+      </div>
+      <div class="profile-section-body">
+        ${favChannels.length ? favChannels.map(ch=>`<div onclick="navigate('channel',${ch.id})" style="display:flex;align-items:center;gap:10px;padding:8px;border-radius:10px;cursor:pointer;transition:background .15s" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='transparent'">
+          <div class="${ch.avatar}" style="width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:700;flex-shrink:0">${ch.name[0]}</div>
+          <div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${ch.name}</div><div style="font-size:10px;color:var(--text4)">${fmt(ch.subscribers)} подп.</div></div>
+          <div style="font-size:11px;color:var(--emerald);font-weight:600">+${fmt(ch.growthDay)}</div>
+        </div>`).join('') : `<div style="text-align:center;padding:20px;color:var(--text4);font-size:13px">Нет избранных каналов<br><button onclick="navigate('home')" style="color:var(--violet);font-size:12px;margin-top:8px">Добавить →</button></div>`}
+      </div>
+    </div>
+
+    <!-- Recently viewed -->
+    <div class="profile-section">
+      <div class="profile-section-header">
+        <span class="profile-section-title">🕐 Недавно просмотренные</span>
+      </div>
+      <div class="profile-section-body">
+        ${recentChannels.length ? recentChannels.map(ch=>`<div onclick="navigate('channel',${ch.id})" style="display:flex;align-items:center;gap:10px;padding:8px;border-radius:10px;cursor:pointer;transition:background .15s" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='transparent'">
+          <div class="${ch.avatar}" style="width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:700;flex-shrink:0">${ch.name[0]}</div>
+          <div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${ch.name}</div><div style="font-size:10px;color:var(--text4)">${ch.username}</div></div>
+        </div>`).join('') : `<div style="text-align:center;padding:20px;color:var(--text4);font-size:13px">Нет просмотренных<br><button onclick="navigate('home')" style="color:var(--violet);font-size:12px;margin-top:8px">К каталогу →</button></div>`}
+      </div>
+    </div>
+    </div>
+
+    <!-- Settings -->
+    <div class="profile-section" id="settings-section">
+      <div class="profile-section-header">
+        <span class="profile-section-title">${icons.settings} Настройки аккаунта</span>
+      </div>
+      <div class="profile-section-body">
+        <form onsubmit="handleSaveSettings(event)">
+          <div class="settings-row" style="margin-bottom:12px">
+            <div class="form-group" style="margin-bottom:0"><label class="form-label">Имя</label><input class="form-input" name="name" value="${currentUser.name}" required /></div>
+            <div class="form-group" style="margin-bottom:0"><label class="form-label">Email</label><input class="form-input" name="email" type="email" value="${currentUser.email}" required /></div>
+          </div>
+          <div class="settings-row" style="margin-bottom:16px">
+            <div class="form-group" style="margin-bottom:0"><label class="form-label">Новый пароль</label><input class="form-input" name="newpass" type="password" placeholder="Оставьте пустым, чтобы не менять" /></div>
+            <div class="form-group" style="margin-bottom:0"><label class="form-label">Подтверждение</label><input class="form-input" name="newpass2" type="password" placeholder="Повторите новый пароль" /></div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+            <button type="submit" class="settings-save-btn">${icons.check} Сохранить изменения</button>
+            <div id="settings-msg" style="font-size:12px;color:var(--emerald)"></div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Appearance -->
+    <div class="profile-section">
+      <div class="profile-section-header">
+        <span class="profile-section-title">🎨 Оформление</span>
+      </div>
+      <div class="profile-section-body">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+          <div>
+            <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px">Тема оформления</div>
+            <div style="font-size:12px;color:var(--text4)">Текущая: ${state.theme==='dark'?'🌙 Тёмная':'☀️ Светлая'}</div>
+          </div>
+          <button onclick="state.theme=state.theme==='dark'?'light':'dark';render()" style="display:flex;align-items:center;gap:8px;padding:10px 20px;border-radius:12px;background:var(--bg3);border:1px solid var(--border);font-size:13px;font-weight:600;color:var(--text2);transition:all .2s">${state.theme==='dark'?icons.sun:icons.moon} ${state.theme==='dark'?'Переключить на светлую':'Переключить на тёмную'}</button>
+        </div>
+        <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border2)">
+          <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--text4);margin-bottom:10px">Цвет аватара</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            ${['grad-violet','grad-blue','grad-emerald','grad-amber','grad-pink','grad-indigo','grad-teal','grad-orange'].map(g=>`<button onclick="setAvatarColor('${g}')" style="width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:700;transition:all .2s;${currentUser.avatar===g?'box-shadow:0 0 0 3px var(--violet),0 0 0 5px var(--bg)':'opacity:.7'}" class="${g}">${currentUser.name[0].toUpperCase()}</button>`).join('')}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Danger zone -->
+    <div class="profile-section">
+      <div class="profile-section-header">
+        <span class="profile-section-title" style="color:var(--red)">⚠️ Опасная зона</span>
+      </div>
+      <div class="profile-section-body" style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="danger-btn" onclick="clearData()">🗑️ Очистить историю и избранное</button>
+        <button class="danger-btn" onclick="deleteAccount()">❌ Удалить аккаунт</button>
+      </div>
+    </div>
+
+  </div>`;
+}
+
+function setAvatarColor(grad) {
+  if(!currentUser) return;
+  currentUser.avatar = grad;
+  const idx = authUsers.findIndex(u=>u.id===currentUser.id);
+  if(idx>=0) authUsers[idx] = currentUser;
+  saveUsers(); saveCurrentUser(); render();
+}
+
+function handleSaveSettings(e) {
+  e.preventDefault();
+  const f = e.target;
+  const name = f.name.value.trim();
+  const email = f.email.value.trim();
+  const newpass = f.newpass.value;
+  const newpass2 = f.newpass2.value;
+  if(newpass && newpass !== newpass2) { alert('Пароли не совпадают'); return; }
+  if(email !== currentUser.email && authUsers.find(u=>u.email===email && u.id!==currentUser.id)) { alert('Такой email уже занят'); return; }
+  currentUser.name = name;
+  currentUser.email = email;
+  if(newpass) currentUser.password = btoa(newpass);
+  const idx = authUsers.findIndex(u=>u.id===currentUser.id);
+  if(idx>=0) authUsers[idx] = currentUser;
+  saveUsers(); saveCurrentUser();
+  const msg = document.getElementById('settings-msg');
+  if(msg) { msg.textContent = '✓ Сохранено!'; setTimeout(()=>{msg.textContent='';},2000); }
+  render();
+}
+
+function doLogout() {
+  authLogout();
+  state.page='home';
+  render();
+}
+
+function clearData() {
+  if(!confirm('Очистить историю просмотров и избранное?')) return;
+  state.favs=[]; state.compare=[]; state.recent=[];
+  saveFavs(); saveRecent(); render();
+}
+
+function deleteAccount() {
+  if(!confirm('Удалить аккаунт? Это действие необратимо.')) return;
+  authUsers = authUsers.filter(u=>u.id!==currentUser.id);
+  saveUsers();
+  authLogout();
+  state.page='home';
+  render();
+}
+
 function bindEvents() {
-  // Close notif dropdown on outside click
-  document.addEventListener('click', function handler(e) {
-    if(state.showNotif && !e.target.closest('.notif-dropdown') && !e.target.closest('.icon-btn')) {
-      state.showNotif=false; render();
+  // No dropdowns to close now (profile is a full page)
+  // Init ad slider on every render (only if on home page)
+  requestAnimationFrame(() => {
+    if(document.getElementById('ad-track')) {
+      if(adSliderTimer) clearInterval(adSliderTimer);
+      adSliderTimer = null;
+      adSliderInit();
     }
-    document.removeEventListener('click', handler);
   });
+}
+
+
+// ========== AD SLIDER LOGIC ==========
+let adSliderIndex = 0;
+let adSliderTotal = 6;
+let adSliderTimer = null;
+let adSliderVisible = 4; // cards visible
+
+function adGetVisible() {
+  if(window.innerWidth < 480) return 1;
+  if(window.innerWidth < 768) return 2;
+  return 4;
+}
+
+function adSliderGoTo(idx) {
+  adSliderVisible = adGetVisible();
+  const maxIdx = adSliderTotal - adSliderVisible;
+  adSliderIndex = Math.max(0, Math.min(idx, maxIdx));
+  const track = document.getElementById('ad-track');
+  const wrap = document.getElementById('ad-wrap');
+  if(!track || !wrap) return;
+  const cards = track.querySelectorAll('.ad-card');
+  if(!cards.length) return;
+  const gap = 12;
+  const wrapW = wrap.offsetWidth;
+  const cardW = (wrapW - gap * (adSliderVisible - 1)) / adSliderVisible;
+  const offset = adSliderIndex * (cardW + gap);
+  track.style.transform = `translateX(-${offset}px)`;
+  // Update dots
+  document.querySelectorAll('.ad-dot').forEach((d,i) => {
+    d.classList.toggle('active', i === adSliderIndex);
+  });
+  // Nav visibility
+  const prev = document.getElementById('ad-prev');
+  const next = document.getElementById('ad-next');
+  if(prev) prev.style.opacity = adSliderIndex <= 0 ? '0.3' : '1';
+  if(next) next.style.opacity = adSliderIndex >= maxIdx ? '0.3' : '1';
+}
+
+function adSliderNext() {
+  adSliderVisible = adGetVisible();
+  const maxIdx = adSliderTotal - adSliderVisible;
+  adSliderGoTo(adSliderIndex >= maxIdx ? 0 : adSliderIndex + 1);
+  adResetTimer();
+}
+
+function adSliderPrev() {
+  adSliderVisible = adGetVisible();
+  const maxIdx = adSliderTotal - adSliderVisible;
+  adSliderGoTo(adSliderIndex <= 0 ? maxIdx : adSliderIndex - 1);
+  adResetTimer();
+}
+
+function adStartTimer() {
+  adSliderTimer = setInterval(() => {
+    adSliderVisible = adGetVisible();
+    const maxIdx = adSliderTotal - adSliderVisible;
+    adSliderGoTo(adSliderIndex >= maxIdx ? 0 : adSliderIndex + 1);
+  }, 5000);
+}
+
+function adResetTimer() {
+  if(adSliderTimer) clearInterval(adSliderTimer);
+  adStartTimer();
+}
+
+function adSliderInit() {
+  const track = document.getElementById('ad-track');
+  if(!track) return;
+  adSliderVisible = adGetVisible();
+  adSliderIndex = 0;
+  // Fix card widths inline
+  const wrap = document.getElementById('ad-wrap');
+  if(wrap) {
+    const gap = 12;
+    const wrapW = wrap.offsetWidth;
+    const cardW = (wrapW - gap * (adSliderVisible - 1)) / adSliderVisible;
+    track.querySelectorAll('.ad-card').forEach(c => {
+      c.style.flex = `0 0 ${cardW}px`;
+      c.style.minWidth = `${cardW}px`;
+    });
+  }
+  adSliderGoTo(0);
+  adResetTimer();
+  // Pause on hover (desktop)
+  if(wrap) {
+    wrap.addEventListener('mouseenter', () => { if(adSliderTimer) clearInterval(adSliderTimer); });
+    wrap.addEventListener('mouseleave', () => adStartTimer());
+  }
+  // Touch swipe support
+  if(wrap && !wrap._touchBound) {
+    wrap._touchBound = true;
+    let tx0 = 0;
+    wrap.addEventListener('touchstart', e => { tx0 = e.touches[0].clientX; }, {passive:true});
+    wrap.addEventListener('touchend', e => {
+      const dx = e.changedTouches[0].clientX - tx0;
+      if(Math.abs(dx) > 40) { dx < 0 ? adSliderNext() : adSliderPrev(); }
+    }, {passive:true});
+  }
 }
 
 // Init
