@@ -697,6 +697,27 @@ const categories = [
 // реальными данными из Firebase (loadApprovedChannels).
 let channels = [];
 
+// Генерация простой истории для графиков (на основе текущих подписчиков/просмотров)
+function genHistory(baseSubs, baseViews, days) {
+  const h = [];
+  let s = baseSubs - Math.floor(baseSubs * 0.15);
+  const now = new Date();
+  for (let i = days; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    const g = Math.floor(Math.random() * (baseSubs * 0.004)) + Math.floor(baseSubs * 0.0005);
+    s += g;
+    const v = Math.floor(baseViews * (0.7 + Math.random() * 0.6));
+    h.push({
+      date: d.toISOString().split('T')[0],
+      subscribers: s,
+      views: v,
+      growth: g
+    });
+  }
+  return h;
+}
+
 // ========== UTILS ==========
 function fmt(n) { if(n>=1e6) return (n/1e6).toFixed(1)+'M'; if(n>=1e3) return (n/1e3).toFixed(1)+'K'; return ''+n; }
 function fmtFull(n) { return n.toLocaleString('ru-RU'); }
