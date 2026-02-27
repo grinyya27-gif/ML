@@ -2375,7 +2375,6 @@ function startAutoRefresh() {
     if (state.page === 'home') updateChannelGrid();
   }, 4 * 60 * 60 * 1000);
 }
-}
 
 // Запускаем загрузку одобренных каналов при готовности Firebase
 window.addEventListener('fbReady', () => {
