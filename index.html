@@ -1606,8 +1606,8 @@ function renderAddModal() {
   return `<div class="modal-overlay" onclick="state.showModal=false;render()"><div class="modal-backdrop"></div><div class="modal-content" onclick="event.stopPropagation()"><div class="modal-bar"></div><div class="modal-body" id="modal-body">
     <div class="modal-header"><div><div class="modal-title">Добавить канал</div><div class="modal-subtitle">Отправьте ваш канал на модерацию</div></div><button class="icon-btn" onclick="state.showModal=false;render()">${icons.x}</button></div>
     <form onsubmit="handleAddSubmit(event)">
-      <div class="form-group"><label class="form-label">Username в MAX <span class="req">*</span></label><input class="form-input" name="username" placeholder="@mychannel" required /></div>
-      <div class="form-group"><label class="form-label">Ссылка на канал <span class="req">*</span></label><input class="form-input" name="url" placeholder="https://max.me/mychannel" required /></div>
+      <div class="form-group"><label class="form-label">Название канала <span class="req">*</span></label><input class="form-input" name="name" placeholder="Например: MAX Мемы" required /></div>
+      <div class="form-group"><label class="form-label">Логин в MAX (без @) <span class="req">*</span></label><input class="form-input" name="username" placeholder="mychannel" required /></div>
       <div class="form-group"><label class="form-label">Категория <span class="req">*</span></label><select class="form-select" name="category" required><option value="">Выберите категорию</option>${categories.filter(c=>c.id!=='all').map(c=>`<option value="${c.id}">${c.icon} ${c.name}</option>`).join('')}</select></div>
       <div class="form-group"><label class="form-label">Описание <span class="req">*</span></label><textarea class="form-textarea" name="description" placeholder="Расскажите о вашем канале подробно..." required minlength="20"></textarea></div>
       <div class="form-group"><label class="form-label">Контакт для связи</label><input class="form-input" name="contacts" placeholder="@username или email" /></div>
@@ -1623,12 +1623,13 @@ async function handleAddSubmit(e) {
   const body = document.getElementById('modal-body');
 
   const rawUser = form.username.value.trim();
-  const username = (rawUser.startsWith('@') ? rawUser : '@' + rawUser);
+  const cleanUser = rawUser.replace(/^@/, '');
+  const username = cleanUser; // храним без @
 
   const data = {
-    name:        '',
+    name:        form.name.value.trim(),
     username:    username,
-    url:         form.url.value.trim(),
+    url:         `https://max.me/${encodeURIComponent(username)}`,
     category:    form.category.value,
     description: form.description.value.trim(),
     contacts:    form.contacts ? form.contacts.value.trim() : '',
