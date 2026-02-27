@@ -54,6 +54,14 @@ window.fbSetStatus = async (id, status) => {
   await updateDoc(doc(db, 'submissions', id), { status });
 };
 
+// Обновить статистику канала (данные из api.oneme.ru)
+window.fbUpdateChannelStats = async (id, stats) => {
+  await updateDoc(doc(db, 'submissions', id), {
+    ...stats,
+    statsUpdatedAt: serverTimestamp()
+  });
+};
+
 // Сигнал что Firebase готов
 window._fbReady = true;
 window.dispatchEvent(new Event('fbReady'));
@@ -302,6 +310,7 @@ input,select,textarea { font-family:inherit; }
 .ch-act-btn.cmp-active { background:rgba(139,92,246,.1); color:var(--violet); }
 .ch-top { display:flex; gap:14px; }
 .ch-avatar { width:52px; height:52px; border-radius:14px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:20px; font-weight:700; flex-shrink:0; }
+img.ch-avatar, img.ch-big-avatar, img.top-avatar, img.top-table-avatar, img.recent-avatar, img.hs-dropdown-avatar, img.compare-avatar { display:block; object-fit:cover; }
 .ch-info { flex:1; min-width:0; }
 .ch-name-row { display:flex; align-items:center; gap:6px; margin-bottom:2px; }
 .ch-name { font-size:15px; font-weight:700; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; transition:color .2s; }
@@ -743,6 +752,14 @@ const channels = rawChannels.map(ch => ({
 // ========== UTILS ==========
 function fmt(n) { if(n>=1e6) return (n/1e6).toFixed(1)+'M'; if(n>=1e3) return (n/1e3).toFixed(1)+'K'; return ''+n; }
 function fmtFull(n) { return n.toLocaleString('ru-RU'); }
+
+// Рендер аватара: если есть URL из API — показываем картинку, иначе градиент с буквой
+function renderAvatar(ch, className) {
+  if (ch.avatarUrl) {
+    return `<img class="${className}" src="${ch.avatarUrl}" alt="${ch.name}" style="object-fit:cover" onerror="this.outerHTML='<div class=\\'${className} ${ch.avatar || avatarGrads[0]}\\'>${(ch.name||'?')[0]}</div>'" />`;
+  }
+  return `<div class="${className} ${ch.avatar || avatarGrads[0]}">${(ch.name||'?')[0]}</div>`;
+}
 function getCat(id) { const c=categories.find(x=>x.id===id); return c?c.name:id; }
 function getCatIcon(id) { const c=categories.find(x=>x.id===id); return c?c.icon:'📋'; }
 function catCount(id) { if(id==='all') return channels.length; return channels.filter(c=>c.category===id).length; }
@@ -1000,7 +1017,7 @@ function headerSearchInput(val) {
     const items = results.map(ch => {
       const hl = n => n.replace(new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi'), m => `<mark>${escHtml(m)}</mark>`);
       return `<button class="hs-dropdown-item" onclick="hsPickChannel(${ch.id})">
-        <div class="hs-dropdown-avatar ${ch.avatar}">${ch.name[0]}</div>
+        ${renderAvatar(ch,'hs-dropdown-avatar')}
         <div style="flex:1;min-width:0">
           <div class="hs-dropdown-name">${hl(escHtml(ch.name))}${ch.verified ? ' <span style="color:var(--blue);font-size:11px">✓</span>' : ''}</div>
           <div class="hs-dropdown-meta">${escHtml(ch.username)} · ${ch.category}</div>
@@ -1278,7 +1295,7 @@ function handleAdClick(i) {
 function renderRecent() {
   const rc = state.recent.map(id=>channels.find(c=>c.id===id)).filter(Boolean).slice(0,6);
   if(!rc.length) return '';
-  return `<div class="recent-section"><div class="recent-title">${icons.clock} Недавно просмотренные</div><div class="recent-scroll">${rc.map(ch=>`<div class="recent-card" onclick="navigate('channel',${ch.id})"><div class="recent-avatar ${ch.avatar}">${ch.name[0]}</div><div><div class="recent-name">${ch.name}</div><div class="recent-subs">${fmt(ch.subscribers)} подп.</div></div></div>`).join('')}</div></div>`;
+  return `<div class="recent-section"><div class="recent-title">${icons.clock} Недавно просмотренные</div><div class="recent-scroll">${rc.map(ch=>`<div class="recent-card" onclick="navigate('channel',${ch.id})">${renderAvatar(ch,'recent-avatar')}<div><div class="recent-name">${ch.name}</div><div class="recent-subs">${fmt(ch.subscribers)} подп.</div></div></div>`).join('')}</div></div>`;
 }
 
 function renderTopChannels() {
@@ -1287,7 +1304,7 @@ function renderTopChannels() {
   const byGrowth=[...channels].sort((a,b)=>b.growthDay-a.growthDay).slice(0,5);
   function topCard(title,icon,grad,chs,vk,isG) {
     const ranks=['background:rgba(251,191,36,.12);color:#f59e0b','background:rgba(148,163,184,.15);color:#94a3b8','background:rgba(251,146,60,.12);color:#fb923c','background:var(--bg3);color:var(--text4)','background:var(--bg3);color:var(--text4)'];
-    return `<div class="card"><div class="top-card-header" style="background:linear-gradient(135deg,${grad})"><h3><div class="icon-wrap">${icon}</div>${title}</h3>${icons.crown}</div><div style="padding:8px">${chs.map((ch,i)=>`<div class="top-item" onclick="navigate('channel',${ch.id})"><div class="top-rank" style="${ranks[i]}">${i+1}</div><div class="top-avatar ${ch.avatar}">${ch.name[0]}</div><div class="top-info"><div class="top-name">${ch.name}</div><div class="top-username">${ch.username}</div></div><div class="top-val" style="color:${isG?'var(--emerald)':'var(--text)'}">${isG?'+':''}${fmt(ch[vk])}</div></div>`).join('')}</div><button class="top-view-all" onclick="navigate('top','${vk}')">Показать полный рейтинг →</button></div>`;
+    return `<div class="card"><div class="top-card-header" style="background:linear-gradient(135deg,${grad})"><h3><div class="icon-wrap">${icon}</div>${title}</h3>${icons.crown}</div><div style="padding:8px">${chs.map((ch,i)=>`<div class="top-item" onclick="navigate('channel',${ch.id})"><div class="top-rank" style="${ranks[i]}">${i+1}</div>${renderAvatar(ch,'top-avatar')}<div class="top-info"><div class="top-name">${ch.name}</div><div class="top-username">${ch.username}</div></div><div class="top-val" style="color:${isG?'var(--emerald)':'var(--text)'}">${isG?'+':''}${fmt(ch[vk])}</div></div>`).join('')}</div><button class="top-view-all" onclick="navigate('top','${vk}')">Показать полный рейтинг →</button></div>`;
   }
   return `<div class="top-grid">${topCard('Топ по подписчикам',icons.users,'#3b82f6,#06b6d4',bySubs,'subscribers',false)}${topCard('Топ по просмотрам',icons.eye,'#10b981,#14b8a6',byViews,'views',false)}${topCard('Топ по приросту',icons.trending,'#8b5cf6,#a855f7',byGrowth,'growthDay',true)}</div>`;
 }
@@ -1330,7 +1347,7 @@ function renderChannelCard(ch, rank) {
       <button class="ch-act-btn ${isCmp?'cmp-active':''}" onclick="event.stopPropagation();toggleCompare(${ch.id})" title="Сравнить">${icons.compare}</button>
       <button class="ch-act-btn ${isFav?'fav-active':''}" onclick="event.stopPropagation();toggleFav(${ch.id})" title="Избранное">${isFav?icons.heartFill:icons.heart}</button>
     </div>
-    <div class="ch-top"><div class="ch-avatar ${ch.avatar}">${ch.name[0]}</div><div class="ch-info"><div class="ch-name-row"><span class="ch-name">${ch.name}</span>${ch.verified?`<span class="ch-verified">${icons.badge}</span>`:''}</div><div class="ch-username">${ch.username}</div><div class="ch-desc">${ch.desc}</div></div></div>
+    <div class="ch-top">${renderAvatar(ch,'ch-avatar')}<div class="ch-info"><div class="ch-name-row"><span class="ch-name">${ch.name}</span>${ch.verified?`<span class="ch-verified">${icons.badge}</span>`:''}</div><div class="ch-username">${ch.username}</div><div class="ch-desc">${ch.desc}</div></div></div>
     ${ch.tags.length?`<div class="ch-tags">${ch.tags.slice(0,3).map(t=>`<span class="ch-tag">#${t}</span>`).join('')}</div>`:''}
     <div class="sparkline">${makeSvgSpark(ch.history,'subscribers','#8b5cf6',120,28)}<span>14 дней</span></div>
     <div class="ch-stats">
@@ -1368,8 +1385,8 @@ function renderChannelPage() {
   html += `<div class="container" style="padding-top:24px">`;
 
   // Header card
-  html += `<div class="ch-header-card"><div class="ch-banner ${ch.avatar}" style="position:relative"><div style="position:absolute;inset:0;background:rgba(0,0,0,.1)"></div></div>
-    <div class="ch-header-body"><div class="ch-header-top"><div class="ch-big-avatar ${ch.avatar}" style="border-color:var(--bg2)">${ch.name[0]}</div>
+  html += `<div class="ch-header-card"><div class="ch-banner ${ch.avatar}" style="position:relative">${ch.avatarUrl?`<img src="${ch.avatarUrl}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.25;filter:blur(8px)" onerror="this.remove()">`:''}  <div style="position:absolute;inset:0;background:rgba(0,0,0,.1)"></div></div>
+    <div class="ch-header-body"><div class="ch-header-top">${renderAvatar(ch,'ch-big-avatar')}
       <div class="ch-header-info"><div class="ch-big-name">${ch.name} ${ch.verified?icons.badge:''}</div><div class="ch-big-username">${ch.username}</div>
         <div class="ch-full-desc">${ch.fullDesc}</div>
         <div class="ch-rankings">
@@ -1509,7 +1526,7 @@ function renderTopPage() {
             <tr class="${i<3?'gold':''}" style="cursor:pointer" onclick="navigate('channel',${ch.id})">
               <td><div class="top-table-rank" style="background:${rankStyle(i)}">${i+1}</div></td>
               <td><div style="display:flex;align-items:center;gap:10px">
-                <div class="top-table-avatar ${ch.avatar}">${ch.name[0]}</div>
+                ${renderAvatar(ch,'top-table-avatar')}
                 <div>
                   <div style="display:flex;align-items:center;gap:4px">
                     <span class="top-table-name">${ch.name}</span>
@@ -1542,7 +1559,7 @@ function renderComparePage() {
 
   return `<div class="detail-bar"><div class="container"><div class="detail-bar-inner"><button class="back-btn" onclick="navigate('home')">${icons.back} Назад</button><span style="font-size:13px;font-weight:600;color:var(--text)">⚖️ Сравнение каналов (${chs.length})</span></div></div></div>
   <div class="container main-content" style="padding-top:24px"><h1 style="text-align:center;font-size:24px;font-weight:800;color:var(--text);margin-bottom:24px">⚖️ Сравнение каналов</h1>
-  <div class="card"><div class="table-scroll"><table class="compare-table"><thead><tr><th style="text-align:left">Метрика</th>${chs.map(ch=>`<th><div style="display:flex;flex-direction:column;align-items:center;gap:8px"><div class="compare-avatar ${ch.avatar}" onclick="navigate('channel',${ch.id})">${ch.name[0]}<button class="compare-remove" onclick="event.stopPropagation();toggleCompare(${ch.id})">×</button></div><span style="font-size:12px;font-weight:600;color:var(--text);cursor:pointer" onclick="navigate('channel',${ch.id})">${ch.name}</span></div></th>`).join('')}</tr></thead><tbody>
+  <div class="card"><div class="table-scroll"><table class="compare-table"><thead><tr><th style="text-align:left">Метрика</th>${chs.map(ch=>`<th><div style="display:flex;flex-direction:column;align-items:center;gap:8px"><div class="compare-avatar" onclick="navigate('channel',${ch.id})" style="overflow:hidden">${renderAvatar(ch,'compare-avatar')}<button class="compare-remove" onclick="event.stopPropagation();toggleCompare(${ch.id})">×</button></div><span style="font-size:12px;font-weight:600;color:var(--text);cursor:pointer" onclick="navigate('channel',${ch.id})">${ch.name}</span></div></th>`).join('')}</tr></thead><tbody>
   <tr><td style="font-size:13px;font-weight:500;color:var(--text2)">📈 График</td>${chs.map(ch=>`<td><div style="display:flex;justify-content:center">${makeSvgSpark(ch.history,'subscribers','#8b5cf6',120,40)}</div></td>`).join('')}</tr>
   ${metrics.map(m=>{const b=best(m.k);return `<tr><td><div class="metric-cell">${m.i}<span style="font-size:13px;font-weight:500;color:var(--text2)">${m.l}</span></div></td>${chs.map(ch=>{const v=ch[m.k];const isB=v===b&&chs.length>1;return `<td><span style="font-size:13px;font-weight:700;color:${isB?'var(--emerald)':m.g?'var(--violet)':'var(--text)'}">${m.f(v)}</span>${isB?'<span class="best-badge">лучший</span>':''}</td>`;}).join('')}</tr>`;}).join('')}
   </tbody></table></div></div></div>`;
@@ -1590,12 +1607,12 @@ function renderAddModal() {
   return `<div class="modal-overlay" onclick="state.showModal=false;render()"><div class="modal-backdrop"></div><div class="modal-content" onclick="event.stopPropagation()"><div class="modal-bar"></div><div class="modal-body" id="modal-body">
     <div class="modal-header"><div><div class="modal-title">Добавить канал</div><div class="modal-subtitle">Отправьте ваш канал на модерацию</div></div><button class="icon-btn" onclick="state.showModal=false;render()">${icons.x}</button></div>
     <form onsubmit="handleAddSubmit(event)">
-      <div class="form-group"><label class="form-label">Название канала <span class="req">*</span></label><input class="form-input" name="name" placeholder="MAX Новости" required /></div>
+      <div class="form-group"><label class="form-label">Username в MAX <span class="req">*</span></label><input class="form-input" name="username" placeholder="@mychannel" required /></div>
       <div class="form-group"><label class="form-label">Ссылка на канал <span class="req">*</span></label><input class="form-input" name="url" placeholder="https://max.me/mychannel" required /></div>
       <div class="form-group"><label class="form-label">Категория <span class="req">*</span></label><select class="form-select" name="category" required><option value="">Выберите категорию</option>${categories.filter(c=>c.id!=='all').map(c=>`<option value="${c.id}">${c.icon} ${c.name}</option>`).join('')}</select></div>
       <div class="form-group"><label class="form-label">Описание <span class="req">*</span></label><textarea class="form-textarea" name="description" placeholder="Расскажите о вашем канале подробно..." required minlength="20"></textarea></div>
-      <div class="form-group"><label class="form-label">Контакт для связи</label><input class="form-input" name="contacts" placeholder="@username или email (необязательно)" /></div>
-      <div class="form-note">📋 После отправки заявки модераторы проверят канал. Обычно это занимает 1–2 рабочих дня.</div>
+      <div class="form-group"><label class="form-label">Контакт для связи</label><input class="form-input" name="contacts" placeholder="@username или email" /></div>
+      <div class="form-note">✨ Название, аватарка, количество подписчиков и просмотров загрузятся автоматически из MAX после одобрения заявки и будут обновляться каждые 4 часа.</div>
       <button type="submit" class="submit-btn">Отправить на модерацию</button>
     </form>
   </div></div></div>`;
@@ -1606,13 +1623,25 @@ async function handleAddSubmit(e) {
   const form = e.target;
   const body = document.getElementById('modal-body');
 
+  const rawUsername = form.username.value.trim();
+  const username = (rawUsername.startsWith('@') ? '' : '@') + rawUsername.replace('@','');
+
   const data = {
-    name:        form.name.value.trim(),
+    name:        '',  // будет заполнено из API после одобрения
+    username:    username,
     url:         form.url.value.trim(),
-    username:    form.url.value.trim().replace(/.*\//, '@'),
     category:    form.category.value,
     description: form.description.value.trim(),
-    contacts:    form.contacts ? form.contacts.value.trim() : ''
+    contacts:    form.contacts ? form.contacts.value.trim() : '',
+    // Статистика заполняется автоматически из api.oneme.ru
+    subscribers: 0,
+    avgViews:    0,
+    growthDay:   0,
+    growthWeek:  0,
+    growthMonth: 0,
+    postsPerDay: 0,
+    avatarUrl:   '',
+    statsUpdatedAt: null
   };
 
   // Показываем лоадер
@@ -2135,8 +2164,16 @@ async function adminSetStatus(id, status) {
     if(item) item.status = status;
     renderAdminList();
 
-    // Если одобрили — подгружаем одобренные каналы
-    if(status === 'approved') loadApprovedChannels();
+    // Если одобрили — подгружаем каналы и сразу синхронизируем статистику из API
+    if(status === 'approved') {
+      await loadApprovedChannels();
+      // Запускаем немедленную синхронизацию для только что одобренного канала
+      if(item && item.username) {
+        const ch = channels.find(c => c._fbId === id);
+        const ok = await syncChannelStats(id, item.username, ch);
+        if(ok && state.page === 'home') updateChannelGrid();
+      }
+    }
   } catch(e) {
     alert('Ошибка: ' + e.message);
   }
@@ -2195,35 +2232,191 @@ function renderAdminPage() {
   </div>`;
 }
 
+// ========== ONEME API INTEGRATION ==========
+
+// Получить данные канала по username с api.oneme.ru
+async function fetchOneMeStats(username) {
+  const clean = username.replace(/^@/, '');
+  try {
+    // Пробуем основной эндпоинт
+    const res = await fetch(`https://api.oneme.ru/api/channel/${clean}`, {
+      headers: { 'Accept': 'application/json' }
+    });
+    if (res.ok) {
+      const d = await res.json();
+      return normalizeOneMeResponse(d, clean);
+    }
+  } catch(e) {}
+
+  try {
+    // Пробуем альтернативный эндпоинт
+    const res2 = await fetch(`https://api.oneme.ru/v1/channels/${clean}`);
+    if (res2.ok) {
+      const d = await res2.json();
+      return normalizeOneMeResponse(d, clean);
+    }
+  } catch(e) {}
+
+  try {
+    // Пробуем через username lookup
+    const res3 = await fetch(`https://api.oneme.ru/api/user/${clean}`);
+    if (res3.ok) {
+      const d = await res3.json();
+      return normalizeOneMeResponse(d, clean);
+    }
+  } catch(e) {}
+
+  return null;
+}
+
+// Нормализовать ответ API в наш формат (разные варианты структуры)
+function normalizeOneMeResponse(d, username) {
+  if (!d) return null;
+  // Пробуем вытащить данные из разных возможных структур ответа
+  const data = d.data || d.channel || d.user || d.result || d;
+
+  const subscribers = data.subscribers_count ?? data.subscribers ?? data.members_count
+    ?? data.membersCount ?? data.followersCount ?? data.followers_count ?? 0;
+  const views = data.views_count ?? data.views ?? data.total_views ?? data.totalViews ?? 0;
+  const avgViews = data.avg_views ?? data.avgViews ?? data.average_views
+    ?? (views > 0 ? Math.round(views / Math.max(data.posts_count || 1, 1)) : 0);
+  const postsCount = data.posts_count ?? data.postsCount ?? data.messages_count ?? 0;
+
+  const name = data.title ?? data.name ?? data.display_name ?? data.displayName ?? username;
+  const avatarUrl = data.avatar ?? data.avatar_url ?? data.avatarUrl
+    ?? data.photo ?? data.photo_url ?? data.photoUrl ?? data.image ?? data.image_url ?? '';
+
+  return {
+    name:        name,
+    avatarUrl:   avatarUrl,
+    subscribers: Number(subscribers) || 0,
+    avgViews:    Number(avgViews) || 0,
+    totalPosts:  Number(postsCount) || 0,
+    postsPerDay: data.posts_per_day ?? data.postsPerDay ?? 0,
+    verified:    data.verified ?? data.is_verified ?? false,
+    views:       Number(views) || 0
+  };
+}
+
+// Сохранить свежую статистику в Firebase и обновить локальный массив channels
+async function syncChannelStats(fbId, username, existingChannel) {
+  const stats = await fetchOneMeStats(username);
+  if (!stats) return false;
+
+  // Обновляем в Firebase
+  if (window._fbReady) {
+    try {
+      const update = {
+        name:       stats.name || existingChannel?.name || '',
+        avatarUrl:  stats.avatarUrl || '',
+        subscribers: stats.subscribers,
+        avgViews:    stats.avgViews,
+        postsPerDay: stats.postsPerDay,
+        totalPosts:  stats.totalPosts,
+        verified:    stats.verified
+      };
+      await window.fbUpdateChannelStats(fbId, update);
+    } catch(e) {
+      console.warn('Не удалось сохранить статистику в Firebase:', e);
+    }
+  }
+
+  // Обновляем локальный массив channels
+  const ch = channels.find(c => c._fbId === fbId);
+  if (ch) {
+    ch.name        = stats.name || ch.name;
+    ch.avatarUrl   = stats.avatarUrl || ch.avatarUrl || '';
+    ch.subscribers = stats.subscribers;
+    ch.avgViews    = stats.avgViews;
+    ch.postsPerDay = stats.postsPerDay;
+    ch.totalPosts  = stats.totalPosts;
+    ch.verified    = stats.verified;
+    // Обновляем историю — добавляем точку сегодня
+    if (ch.history && Array.isArray(ch.history)) {
+      const today = new Date().toISOString().split('T')[0];
+      const last = ch.history[ch.history.length - 1];
+      const growth = last ? Math.max(0, stats.subscribers - (last.subscribers || 0)) : 0;
+      ch.history.push({ date: today, subscribers: stats.subscribers, views: stats.avgViews, growth });
+    }
+  }
+  return true;
+}
+
 // ========== LOAD APPROVED CHANNELS FROM FIREBASE ==========
 async function loadApprovedChannels() {
   try {
-    if(!window._fbReady) return; // тихо пропускаем если FB ещё не готов
+    if (!window._fbReady) return;
     const approved = await window.fbLoadApproved();
-    approved.forEach(ch => {
-      // Добавляем только если нет уже в массиве
-      if(!channels.find(c => c._fbId === ch._fbId)) {
-        const newId = Math.max(...channels.map(c=>c.id)) + 1;
-        channels.push({
-          id: newId,
-          name: ch.name || 'Без названия',
-          username: ch.username || ch.url || '',
-          category: ch.category || 'other',
-          desc: ch.description || '',
-          subscribers: 0, views: 0, growthDay: 0, growthWeek: 0,
-          growthMonth: 0, avgViews: 0, er: 0, verified: false,
-          postsPerDay: 0, totalPosts: 0,
-          tags: [],
-          avatarIdx: Math.floor(Math.random() * 8),
-          history: { subscribers: Array(12).fill(0) },
-          _fbId: ch._fbId
-        });
+
+    for (const ch of approved) {
+      const exists = channels.find(c => c._fbId === ch._fbId);
+      if (!exists) {
+        const newId = Math.max(...channels.map(c => c.id)) + 1;
+        const newCh = {
+          id:          newId,
+          name:        ch.name || ch.username || 'Канал',
+          username:    ch.username || '',
+          url:         ch.url || '',
+          category:    ch.category || 'other',
+          desc:        ch.description || '',
+          fullDesc:    ch.description || '',
+          subscribers: ch.subscribers || 0,
+          views:       ch.views || 0,
+          avgViews:    ch.avgViews || 0,
+          growthDay:   ch.growthDay || 0,
+          growthWeek:  ch.growthWeek || 0,
+          growthMonth: ch.growthMonth || 0,
+          postsPerDay: ch.postsPerDay || 0,
+          totalPosts:  ch.totalPosts || 0,
+          er:          ch.er || 0,
+          verified:    ch.verified || false,
+          tags:        ch.tags || [],
+          avatarUrl:   ch.avatarUrl || '',
+          avatar:      avatarGrads[Math.floor(Math.random() * avatarGrads.length)],
+          history:     genHistory(ch.subscribers || 1000, ch.avgViews || 500, 30),
+          _fbId:       ch._fbId,
+          createdAt:   ch.createdAt?.toDate?.()?.toISOString?.()?.split('T')?.[0] || new Date().toISOString().split('T')[0]
+        };
+        channels.push(newCh);
+
+        // Сразу тянем свежие данные из API если они устарели или отсутствуют
+        const lastUpdate = ch.statsUpdatedAt?.toDate?.() || null;
+        const needsUpdate = !lastUpdate || (Date.now() - lastUpdate.getTime() > 4 * 60 * 60 * 1000);
+        if (needsUpdate && ch.username) {
+          syncChannelStats(ch._fbId, ch.username, newCh).then(ok => {
+            if (ok && state.page === 'home') updateChannelGrid();
+          });
+        }
+      } else {
+        // Канал уже есть — проверяем нужно ли обновить статистику
+        const lastUpdate = ch.statsUpdatedAt?.toDate?.() || null;
+        const needsUpdate = !lastUpdate || (Date.now() - lastUpdate.getTime() > 4 * 60 * 60 * 1000);
+        if (needsUpdate && ch.username) {
+          syncChannelStats(ch._fbId, ch.username, exists);
+        }
       }
-    });
-    if(state.page === 'home') updateChannelGrid();
+    }
+
+    if (state.page === 'home') updateChannelGrid();
+    scheduleStatsRefresh();
   } catch(e) {
     console.warn('Не удалось загрузить одобренные каналы:', e);
   }
+}
+
+// Автообновление статистики каждые 4 часа
+let _refreshTimer = null;
+function scheduleStatsRefresh() {
+  if (_refreshTimer) return; // уже запланировано
+  _refreshTimer = setTimeout(async () => {
+    _refreshTimer = null;
+    const fbChannels = channels.filter(c => c._fbId && c.username);
+    for (const ch of fbChannels) {
+      await syncChannelStats(ch._fbId, ch.username, ch);
+    }
+    if (state.page === 'home') updateChannelGrid();
+    scheduleStatsRefresh(); // запланировать следующее обновление
+  }, 4 * 60 * 60 * 1000); // 4 часа
 }
 
 // Запускаем загрузку одобренных каналов при готовности Firebase
