@@ -1628,7 +1628,7 @@ async function handleAddSubmit(e) {
 
   const data = {
     name:        form.name.value.trim(),
-    username:    username,
+    username:    '@' + username,
     url:         `https://max.ru/${encodeURIComponent(username)}`,
     category:    form.category.value,
     description: form.description.value.trim(),
@@ -2253,8 +2253,8 @@ function parseOneMeData(d, username) {
   };
 }
 
-// Запрос к нашему бэкенду, который уже ходит в MAX API
-const BACKEND_MAX_ENDPOINT = 'https://YOUR_BACKEND_URL/api/max-channel';
+// Запрос к нашему бэкенду (Cloudflare Worker), который берёт данные с mxstat
+const BACKEND_MAX_ENDPOINT = 'https://max-proxy.grinyya27.workers.dev/api/max-channel';
 
 async function fetchChannelFromAPI(username) {
   const u = username.replace(/^@/, '');
