@@ -345,12 +345,11 @@ img.ch-avatar, img.ch-big-avatar, img.top-avatar, img.top-table-avatar, img.rece
 .back-btn:hover { color:var(--violet); }
 .detail-actions { display:flex; align-items:center; gap:6px; }
 
-/* Channel header card */
-.ch-header-card { border-radius:24px; background:var(--bg2); border:1px solid var(--border); overflow:hidden; margin-bottom:24px; }
-.ch-banner { height:100px; position:relative; overflow:hidden; }
-@media(min-width:640px) { .ch-banner { height:130px; } }
-.ch-header-body { padding:0 20px 24px; margin-top:-40px; position:relative; }
-@media(min-width:640px) { .ch-header-body { padding:0 32px 24px; margin-top:-48px; } }
+/* Channel header card (упрощённый, без цветного баннера) */
+.ch-header-card { margin-bottom:24px; }
+.ch-banner { display:none; }
+.ch-header-body { padding:0; position:relative; }
+@media(min-width:640px) { .ch-header-body { padding:0; } }
 .ch-header-top { display:flex; flex-direction:column; gap:16px; }
 @media(min-width:640px) { .ch-header-top { flex-direction:row; gap:20px; } }
 .ch-big-avatar { width:80px; height:80px; border-radius:16px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:32px; font-weight:800; box-shadow:0 8px 24px rgba(0,0,0,.2); border:4px solid var(--bg2); flex-shrink:0; }
@@ -1577,7 +1576,6 @@ function renderAddModal() {
   return `<div class="modal-overlay" onclick="state.showModal=false;render()"><div class="modal-backdrop"></div><div class="modal-content" onclick="event.stopPropagation()"><div class="modal-bar"></div><div class="modal-body" id="modal-body">
     <div class="modal-header"><div><div class="modal-title">Добавить канал</div><div class="modal-subtitle">Отправьте ваш канал на модерацию</div></div><button class="icon-btn" onclick="state.showModal=false;render()">${icons.x}</button></div>
     <form onsubmit="handleAddSubmit(event)">
-      <div class="form-group"><label class="form-label">Название канала <span class="req">*</span></label><input class="form-input" name="name" placeholder="Например: MAX Мемы" required /></div>
       <div class="form-group"><label class="form-label">Логин в MAX (без @) <span class="req">*</span></label><input class="form-input" name="username" placeholder="mychannel" required /></div>
       <div class="form-group"><label class="form-label">Категория <span class="req">*</span></label><select class="form-select" name="category" required><option value="">Выберите категорию</option>${categories.filter(c=>c.id!=='all').map(c=>`<option value="${c.id}">${c.icon} ${c.name}</option>`).join('')}</select></div>
       <div class="form-group"><label class="form-label">Описание <span class="req">*</span></label><textarea class="form-textarea" name="description" placeholder="Расскажите о вашем канале подробно..." required minlength="20"></textarea></div>
@@ -1598,7 +1596,7 @@ async function handleAddSubmit(e) {
   const username = cleanUser; // храним без @
 
   const data = {
-    name:        form.name.value.trim(),
+    name:        '',
     username:    '@' + username,
     url:         `https://max.ru/${encodeURIComponent(username)}`,
     category:    form.category.value,
