@@ -1378,7 +1378,7 @@ function renderChannelPage() {
       <button class="icon-btn" onclick="navigate('category','${ch.category}')" style="font-size:12px;padding:6px 12px">${getCatIcon(ch.category)} ${getCat(ch.category)}</button>
       <button class="icon-btn ${isCmp?'cmp-active':''}" onclick="toggleCompare(${ch.id})" style="${isCmp?'background:rgba(139,92,246,.15);color:var(--violet);border-color:rgba(139,92,246,.3)':''}">${icons.compare}</button>
       <button class="icon-btn ${isFav?'fav-active':''}" onclick="toggleFav(${ch.id})" style="${isFav?'background:rgba(236,72,153,.1);color:var(--pink);border-color:rgba(236,72,153,.3)':''}">${isFav?icons.heartFill:icons.heart}</button>
-      <button class="icon-btn" onclick="state.showShare=true;state.shareLink='https://max.me/${ch.username.replace('@','')}';render()">${icons.share}</button>
+      <button class="icon-btn" onclick="state.showShare=true;state.shareLink='https://max.ru/${ch.username.replace('@','')}';render()">${icons.share}</button>
     </div></div></div></div>`;
 
   html += `<div class="container" style="padding-top:24px">`;
@@ -1398,7 +1398,7 @@ function renderChannelPage() {
           <span class="ch-meta-item">${icons.globe} Русский</span>
           <span class="ch-meta-item">${icons.calendar} ${new Date(ch.createdAt).toLocaleDateString('ru-RU')}</span>
           <span class="ch-meta-item">${icons.clock} ${daysActive} дней</span>
-          <span class="ch-meta-item link" onclick="window.open('https://max.me/${ch.username.replace('@','')}')">${icons.link} Открыть в MAX</span>
+          <span class="ch-meta-item link" onclick="window.open('https://max.ru/${ch.username.replace('@','')}')">${icons.link} Открыть в MAX</span>
         </div>
       </div></div></div></div>`;
 
