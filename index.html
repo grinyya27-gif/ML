@@ -6,6 +6,58 @@
 <title>MaxMetric — Аналитика и каталог каналов MAX</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%238b5cf6'/%3E%3Cstop offset='100%25' stop-color='%233b82f6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3Cpolyline points='6,22 12,14 18,18 26,8' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='26' cy='8' r='2' fill='white'/%3E%3C/svg%3E">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, query, orderBy, where, serverTimestamp }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBeJONvma7JusNoLtrfvCsq6wlAvXMxaro",
+  authDomain: "max-metric.firebaseapp.com",
+  projectId: "max-metric",
+  storageBucket: "max-metric.firebasestorage.app",
+  messagingSenderId: "241766160909",
+  appId: "1:241766160909:web:d9da023c96ed94aefad344"
+};
+
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+
+// ── Экспортируем функции в window чтобы обычный JS мог их вызывать ──
+
+// Отправить заявку
+window.fbSubmitChannel = async (data) => {
+  await addDoc(collection(db, 'submissions'), {
+    ...data,
+    status: 'pending',
+    createdAt: serverTimestamp()
+  });
+};
+
+// Загрузить одобренные каналы из Firestore
+window.fbLoadApproved = async () => {
+  const q = query(collection(db, 'submissions'), where('status','==','approved'));
+  const snap = await getDocs(q);
+  return snap.docs.map(d => ({ _fbId: d.id, ...d.data() }));
+};
+
+// Загрузить все заявки для модератора
+window.fbLoadAll = async () => {
+  const q = query(collection(db, 'submissions'), orderBy('createdAt','desc'));
+  const snap = await getDocs(q);
+  return snap.docs.map(d => ({ _fbId: d.id, ...d.data() }));
+};
+
+// Изменить статус заявки
+window.fbSetStatus = async (id, status) => {
+  await updateDoc(doc(db, 'submissions', id), { status });
+};
+
+// Сигнал что Firebase готов
+window._fbReady = true;
+window.dispatchEvent(new Event('fbReady'));
+</script>
 <style>
 :root {
   --bg: #f8fafc; --bg2: #ffffff; --bg3: #f1f5f9; --bg4: rgba(0,0,0,0.02);
@@ -63,14 +115,28 @@ input,select,textarea { font-family:inherit; }
 .nav-badge.violet { background:var(--violet); }
 .nav-badge.pink { background:var(--pink); }
 /* Header search — always visible, grows to fill space */
-.header-search { flex:1; max-width:480px; margin:0 20px; position:relative; display:flex; }
+.header-search { flex:1; max-width:520px; margin:0 20px; position:relative; display:flex; }
 .header-search input { width:100%; padding:9px 38px 9px 38px; border-radius:12px; background:var(--bg3); border:1px solid var(--border); font-size:13px; color:var(--text); outline:none; transition:all .2s; }
 .header-search input:focus { border-color:rgba(139,92,246,.5); box-shadow:0 0 0 3px rgba(139,92,246,.1); background:var(--bg2); }
 .header-search input::placeholder { color:var(--text4); }
 .header-search .hs-icon { position:absolute; left:11px; top:50%; transform:translateY(-50%); color:var(--text4); pointer-events:none; transition:color .2s; }
-.header-search input:focus ~ .hs-icon, .header-search:focus-within .hs-icon { color:var(--violet); }
-.header-search .hs-clear { position:absolute; right:10px; top:50%; transform:translateY(-50%); color:var(--text4); padding:2px; border-radius:6px; transition:color .2s; }
+.header-search:focus-within .hs-icon { color:var(--violet); }
+.header-search .hs-clear { position:absolute; right:10px; top:50%; transform:translateY(-50%); color:var(--text4); padding:2px; border-radius:6px; transition:color .2s; display:flex; align-items:center; }
 .header-search .hs-clear:hover { color:var(--text); }
+/* Dropdown results */
+.hs-dropdown { position:absolute; top:calc(100% + 8px); left:0; right:0; background:var(--bg2); border:1px solid var(--border); border-radius:16px; box-shadow:0 16px 48px rgba(0,0,0,.14); z-index:200; overflow:hidden; animation:fadeIn .15s ease; }
+.dark .hs-dropdown { box-shadow:0 16px 48px rgba(0,0,0,.5); }
+.hs-dropdown-item { display:flex; align-items:center; gap:12px; padding:10px 14px; cursor:pointer; transition:background .12s; border:none; background:none; width:100%; text-align:left; font-family:inherit; }
+.hs-dropdown-item:hover, .hs-dropdown-item.hs-active { background:var(--bg3); }
+.hs-dropdown-item:not(:last-child) { border-bottom:1px solid var(--border2); }
+.hs-dropdown-avatar { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:14px; font-weight:700; flex-shrink:0; }
+.hs-dropdown-name { font-size:13px; font-weight:600; color:var(--text); }
+.hs-dropdown-name mark { background:transparent; color:var(--violet); font-weight:700; }
+.hs-dropdown-meta { font-size:11px; color:var(--text4); margin-top:1px; }
+.hs-dropdown-subs { font-size:12px; font-weight:600; color:var(--text3); flex-shrink:0; margin-left:auto; padding-left:8px; }
+.hs-dropdown-empty { padding:20px; text-align:center; font-size:13px; color:var(--text4); }
+.hs-dropdown-footer { padding:10px 14px; border-top:1px solid var(--border2); text-align:center; font-size:12px; color:var(--violet); font-weight:600; cursor:pointer; transition:background .12s; }
+.hs-dropdown-footer:hover { background:rgba(139,92,246,.05); }
 /* Mobile: shrink search */
 @media(max-width:600px) { .header-search { margin:0 10px; max-width:none; } }
 .header-actions { display:flex; align-items:center; gap:6px; }
@@ -339,7 +405,68 @@ input,select,textarea { font-family:inherit; }
 .related-section { margin-bottom:32px; }
 .related-title { font-size:18px; font-weight:700; color:var(--text); margin-bottom:16px; }
 
-/* Top Page */
+/* Category cards grid on Top Page */
+.cat-cards-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; margin-bottom:32px; }
+@media(max-width:900px)  { .cat-cards-grid { grid-template-columns:repeat(5,1fr); } }
+@media(max-width:640px)  { .cat-cards-grid { grid-template-columns:repeat(4,1fr); } }
+@media(max-width:440px)  { .cat-cards-grid { grid-template-columns:repeat(3,1fr); } }
+.cat-card { aspect-ratio:1/1; border-radius:18px; border:2px solid var(--border); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; cursor:pointer; transition:all .22s cubic-bezier(.4,0,.2,1); position:relative; overflow:hidden; background:var(--bg2); box-shadow:var(--card-shadow); }
+.cat-card-glow { position:absolute; inset:0; opacity:0; transition:opacity .22s; background:radial-gradient(circle at 50% 40%, var(--cat-color,#8b5cf6), transparent 70%); pointer-events:none; }
+.cat-card:hover .cat-card-glow { opacity:.12; }
+.cat-card.active .cat-card-glow { opacity:.15; }
+.cat-card.active { border-color:var(--cat-color,#8b5cf6); box-shadow:0 0 0 1px var(--cat-color,#8b5cf6), var(--card-shadow); }
+.cat-card:hover { transform:translateY(-3px); box-shadow:0 10px 28px rgba(0,0,0,.1); border-color:var(--cat-color,#8b5cf6); }
+.dark .cat-card:hover { box-shadow:0 10px 28px rgba(0,0,0,.4); }
+.cat-card-emoji { width:44px; height:44px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:22px; line-height:1; position:relative; z-index:1; background:color-mix(in srgb, var(--cat-color,#8b5cf6) 12%, transparent); transition:transform .22s; flex-shrink:0; }
+.cat-card:hover .cat-card-emoji { transform:scale(1.12); }
+.cat-card.active .cat-card-emoji { background:color-mix(in srgb, var(--cat-color,#8b5cf6) 20%, transparent); }
+.cat-card-name { font-size:11px; font-weight:600; color:var(--text3); text-align:center; position:relative; z-index:1; line-height:1.3; padding:0 4px; }
+.cat-card.active .cat-card-name { color:var(--cat-color,#8b5cf6); font-weight:700; }
+.cat-card:hover .cat-card-name { color:var(--text); }
+.cat-card-count { font-size:10px; color:var(--text4); position:relative; z-index:1; font-weight:500; }
+.cat-card.active .cat-card-count { color:var(--cat-color,#8b5cf6); opacity:.8; }
+
+/* Admin Panel */
+.admin-wrap { max-width:900px; margin:0 auto; padding:24px 0 60px; }
+.admin-header-card { border-radius:20px; background:linear-gradient(135deg,#7c3aed,#3b82f6); padding:28px 28px 24px; margin-bottom:24px; position:relative; overflow:hidden; }
+.admin-header-card::before { content:''; position:absolute; inset:0; background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='20'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); }
+.admin-title { font-size:22px; font-weight:800; color:#fff; position:relative; }
+.admin-sub { font-size:13px; color:rgba(255,255,255,.65); margin-top:4px; position:relative; }
+.admin-stats-row { display:flex; gap:10px; margin-top:16px; position:relative; }
+.admin-stat { padding:8px 16px; border-radius:10px; background:rgba(255,255,255,.15); backdrop-filter:blur(8px); font-size:12px; font-weight:600; color:#fff; }
+.admin-stat span { font-size:18px; font-weight:800; display:block; }
+.admin-tabs { display:flex; gap:8px; margin-bottom:16px; }
+.admin-tab { padding:8px 18px; border-radius:10px; font-size:13px; font-weight:600; border:1px solid var(--border); background:var(--bg2); color:var(--text3); cursor:pointer; transition:all .2s; }
+.admin-tab.active { background:var(--violet); border-color:var(--violet); color:#fff; }
+.admin-item { border-radius:14px; background:var(--bg2); border:1px solid var(--border); padding:16px; margin-bottom:12px; transition:border-color .2s; }
+.admin-item:hover { border-color:rgba(139,92,246,.25); }
+.admin-item-header { display:flex; align-items:flex-start; gap:12px; }
+.admin-item-icon { width:44px; height:44px; border-radius:12px; background:linear-gradient(135deg,#8b5cf6,#3b82f6); display:flex; align-items:center; justify-content:center; color:#fff; font-size:18px; font-weight:700; flex-shrink:0; }
+.admin-item-name { font-size:15px; font-weight:700; color:var(--text); }
+.admin-item-url { font-size:12px; color:var(--violet); margin-top:2px; }
+.admin-item-desc { font-size:12px; color:var(--text3); margin-top:8px; line-height:1.5; }
+.admin-item-meta { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+.admin-item-tag { padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600; }
+.admin-item-tag.cat { background:rgba(139,92,246,.1); color:var(--violet); }
+.admin-item-tag.pending { background:rgba(245,158,11,.12); color:#d97706; }
+.admin-item-tag.approved { background:rgba(16,185,129,.12); color:#059669; }
+.admin-item-tag.rejected { background:rgba(239,68,68,.1); color:#dc2626; }
+.admin-item-date { font-size:11px; color:var(--text4); margin-left:auto; }
+.admin-actions { display:flex; gap:8px; margin-top:12px; padding-top:12px; border-top:1px solid var(--border2); }
+.admin-btn { padding:8px 18px; border-radius:10px; font-size:12px; font-weight:700; cursor:pointer; border:none; transition:all .2s; }
+.admin-btn.approve { background:rgba(16,185,129,.12); color:#059669; }
+.admin-btn.approve:hover { background:#059669; color:#fff; }
+.admin-btn.reject  { background:rgba(239,68,68,.1);  color:#dc2626; }
+.admin-btn.reject:hover  { background:#dc2626; color:#fff; }
+.admin-btn.view    { background:var(--bg3); color:var(--text3); }
+.admin-btn.view:hover { background:var(--bg3); color:var(--violet); }
+.admin-empty { text-align:center; padding:48px 24px; color:var(--text4); font-size:14px; }
+.admin-loading { text-align:center; padding:40px; color:var(--text4); }
+.admin-login { max-width:360px; margin:80px auto; background:var(--bg2); border:1px solid var(--border); border-radius:20px; padding:32px; }
+.admin-login h2 { font-size:20px; font-weight:800; margin-bottom:4px; }
+.admin-login p { font-size:13px; color:var(--text3); margin-bottom:24px; }
+
+/* Top Page *//* Top Page */
 .top-page-title { text-align:center; margin-bottom:24px; padding-top:8px; }
 .top-page-title h1 { font-size:28px; font-weight:800; color:var(--text); margin-bottom:4px; }
 .top-page-title p { font-size:13px; color:var(--text3); }
@@ -682,7 +809,7 @@ function authLogout() {
 
 // ========== STATE ==========
 let state = {
-  page:'home', channelId:null, topSort:'subscribers',
+  page:'home', channelId:null, topSort:'subscribers', topCategory:'all',
   search:'', category:'all', sortBy:'subscribers', timePeriod:'day', verifiedOnly:false,
   theme:localStorage.getItem('mm_theme')||'light', showModal:false, showNotif:false, showShare:false, shareLink:'',
   showProfile:false,
@@ -710,6 +837,7 @@ function navigate(page, data) {
     state.page='profile';
   }
   else if(page==='category'){state.category=data;state.page='home';}
+  else if(page==='admin'){state.page='admin';loadAdminSubmissions();}
   window.scrollTo({top:0,behavior:'smooth'});
   render();
 }
@@ -778,6 +906,7 @@ function render() {
   else if(state.page==='compare') html += renderComparePage();
   else if(state.page==='favorites') html += renderFavoritesPage();
   else if(state.page==='profile') html += renderProfilePage();
+  else if(state.page==='admin') html += renderAdminPage();
   else html += renderHomePage();
   html += renderFooter();
   html += renderBottomNav();
@@ -809,12 +938,16 @@ function renderHeader() {
       <span class="hs-icon">${icons.search}</span>
       <input
         id="header-search-input"
-        placeholder="Поиск каналов по названию, @username или тегу..."
+        type="text"
+        placeholder="Поиск каналов по названию или @username..."
         value="${state.search}"
         oninput="headerSearchInput(this.value)"
-        onkeydown="if(event.key==='Escape'){headerSearchClear();}"
+        onkeydown="hsKeyNav(event)"
+        autocomplete="off"
+        spellcheck="false"
       />
-      ${state.search ? `<button class="hs-clear" onclick="headerSearchClear()" title="Очистить">${icons.x}</button>` : ''}
+      <button class="hs-clear" id="hs-clear-btn" onclick="headerSearchClear()" title="Очистить" style="display:${state.search?'flex':'none'}">${icons.x}</button>
+      <div id="hs-dropdown" class="hs-dropdown" style="display:none"></div>
     </div>
 
     <!-- Только переключатель темы -->
@@ -832,21 +965,102 @@ function renderHeader() {
 
 function headerSearchInput(val) {
   state.search = val;
+  const q = val.trim().toLowerCase();
+  const dd = document.getElementById('hs-dropdown');
+  if(!dd) return;
+
+  if(!q) {
+    dd.style.display = 'none';
+    // Обновляем грид тихо если мы на главной
+    if(state.page === 'home') updateChannelGrid();
+    return;
+  }
+
+  // Фильтрация по имени и username (живо, без render)
+  const results = channels.filter(c =>
+    c.name.toLowerCase().includes(q) ||
+    c.username.toLowerCase().includes(q)
+  ).slice(0, 8);
+
+  // Если мы не на главной — переходим
   if(state.page !== 'home') {
     state.category = 'all';
     state.page = 'home';
+    render();
+    return;
   }
-  render();
-  // Restore focus after re-render
+
+  // Обновляем грид тихо
+  updateChannelGrid();
+
+  // Показываем дропдаун
+  if(results.length === 0) {
+    dd.innerHTML = `<div class="hs-dropdown-empty">🔍 Ничего не найдено по «${escHtml(val)}»</div>`;
+  } else {
+    const items = results.map(ch => {
+      const hl = n => n.replace(new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi'), m => `<mark>${escHtml(m)}</mark>`);
+      return `<button class="hs-dropdown-item" onclick="hsPickChannel(${ch.id})">
+        <div class="hs-dropdown-avatar ${ch.avatar}">${ch.name[0]}</div>
+        <div style="flex:1;min-width:0">
+          <div class="hs-dropdown-name">${hl(escHtml(ch.name))}${ch.verified ? ' <span style="color:var(--blue);font-size:11px">✓</span>' : ''}</div>
+          <div class="hs-dropdown-meta">${escHtml(ch.username)} · ${ch.category}</div>
+        </div>
+        <div class="hs-dropdown-subs">${fmt(ch.subscribers)}</div>
+      </button>`;
+    }).join('');
+    const total = channels.filter(c =>
+      c.name.toLowerCase().includes(q) || c.username.toLowerCase().includes(q) ||
+      c.desc.toLowerCase().includes(q) || c.tags.some(t=>t.toLowerCase().includes(q))
+    ).length;
+    const footer = total > results.length
+      ? `<div class="hs-dropdown-footer" onclick="hsShowAll()">Показать все ${total} результатов →</div>`
+      : '';
+    dd.innerHTML = items + footer;
+  }
+  dd.style.display = 'block';
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function hsPickChannel(id) {
+  document.getElementById('hs-dropdown').style.display = 'none';
+  state.search = '';
   const inp = document.getElementById('header-search-input');
-  if(inp) { inp.focus(); inp.setSelectionRange(val.length, val.length); }
+  if(inp) inp.value = '';
+  navigate('channel', id);
+}
+
+function hsShowAll() {
+  document.getElementById('hs-dropdown').style.display = 'none';
+  if(state.page !== 'home') { state.page = 'home'; state.category = 'all'; }
+  updateChannelGrid();
+}
+
+function updateChannelGrid() {
+  // Тихое обновление грида без полного render()
+  const grid = document.getElementById('channel-grid-live');
+  const info = document.getElementById('results-info-live');
+  if(!grid) return;
+  const filtered = getFiltered();
+  if(info) {
+    info.innerHTML = `Найдено: <strong>${filtered.length}</strong> канал${filtered.length===1?'':filtered.length<5?'а':'ов'}`;
+  }
+  if(filtered.length === 0) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🔍</div><div class="empty-title">Ничего не найдено</div><div class="empty-desc">Попробуйте другой запрос</div><button class="primary-btn" onclick="headerSearchClear()">Сбросить</button></div>`;
+  } else {
+    grid.innerHTML = filtered.map((ch,i) => renderChannelCard(ch,i+1)).join('');
+  }
 }
 
 function headerSearchClear() {
   state.search = '';
-  render();
   const inp = document.getElementById('header-search-input');
-  if(inp) inp.focus();
+  if(inp) { inp.value = ''; inp.focus(); }
+  const dd = document.getElementById('hs-dropdown');
+  if(dd) dd.style.display = 'none';
+  updateChannelGrid();
 }
 
 function renderProfileDropdown() {
@@ -922,11 +1136,11 @@ function renderHomePage() {
   html += renderSidebar();
   html += '<div class="content-area">';
   html += renderSortBar();
-  html += `<div class="results-info"><span>Найдено: <strong>${filtered.length}</strong> каналов${state.verifiedOnly?' <span style="font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(59,130,246,.08);color:var(--blue)">✓ Верифицированные</span>':''}</span>${state.category!=='all'?`<button class="reset-btn" onclick="state.category='all';render()">Сбросить ✕</button>`:''}</div>`;
+  html += `<div class="results-info"><span id="results-info-live">Найдено: <strong>${filtered.length}</strong> канал${filtered.length===1?'':filtered.length<5?'а':'ов'}</span>${state.category!=='all'?`<button class="reset-btn" onclick="state.category='all';render()">Сбросить ✕</button>`:''}</div>`;
   if(filtered.length===0) {
-    html += `<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-title">Ничего не найдено</div><div class="empty-desc">Попробуйте изменить запрос или категорию</div><button class="primary-btn" onclick="state.search='';state.category='all';state.verifiedOnly=false;render()">Сбросить фильтры</button></div>`;
+    html += `<div id="channel-grid-live" class="channel-grid"><div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🔍</div><div class="empty-title">Ничего не найдено</div><div class="empty-desc">Попробуйте изменить запрос или категорию</div><button class="primary-btn" onclick="state.search='';state.category='all';state.verifiedOnly=false;headerSearchClear();render()">Сбросить фильтры</button></div></div>`;
   } else {
-    html += '<div class="channel-grid">';
+    html += '<div id="channel-grid-live" class="channel-grid">';
     filtered.forEach((ch,i) => html += renderChannelCard(ch,i+1));
     html += '</div>';
   }
@@ -1207,20 +1421,116 @@ function renderChannelPage() {
   return html;
 }
 
-function renderTopPage() {
-  let sortBy=state.topSort;
-  const sortTabs=[{k:'subscribers',l:'По подписчикам',i:icons.users},{k:'views',l:'По просмотрам',i:icons.eye},{k:'growthDay',l:'По приросту',i:icons.trending}];
-  const sorted=[...channels].sort((a,b)=>b[sortBy]-a[sortBy]);
-  const rankGrads = i => i===0?'grad-amber':i===1?'background:linear-gradient(135deg,#94a3b8,#64748b)':i===2?'grad-orange':'grad-violet';
-  const rankStyles = i => i<3?[,'linear-gradient(135deg,#fbbf24,#d97706)','linear-gradient(135deg,#94a3b8,#64748b)','linear-gradient(135deg,#fb923c,#ea580c)'][i+1]:'linear-gradient(135deg,#8b5cf6,#7c3aed)';
+// Цвета для категорий (по порядку categories, пропуская 'all')
+const catColors = {
+  news:'#ef4444', tech:'#3b82f6', crypto:'#f59e0b', entertainment:'#ec4899',
+  education:'#8b5cf6', business:'#10b981', sport:'#06b6d4', music:'#f97316',
+  gaming:'#6366f1', travel:'#14b8a6', food:'#e11d48', science:'#0ea5e9',
+  design:'#a855f7', marketing:'#22c55e', all:'#8b5cf6'
+};
 
-  return `<div class="detail-bar"><div class="container"><div class="detail-bar-inner"><button class="back-btn" onclick="navigate('home')">${icons.back} Назад</button><div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--text)">${icons.crown} Топ каналов MAX</div></div></div></div>
-  <div class="container main-content" style="padding-top:24px;max-width:960px">
-    <div class="top-page-title"><h1>🏆 Рейтинг каналов MAX</h1><p>Полный рейтинг всех каналов по разным метрикам</p></div>
-    <div style="display:flex;justify-content:center;margin-bottom:24px"><div class="sort-pills">${sortTabs.map(t=>`<button class="sort-pill ${sortBy===t.k?'active':''}" onclick="state.topSort='${t.k}';render()">${t.i} ${t.l}</button>`).join('')}</div></div>
-    <div class="card"><div class="table-scroll"><table class="data-table top-table"><thead><tr><th style="width:48px">#</th><th>Канал</th><th class="right">Подписчики</th><th class="right">Просмотры</th><th class="right">Прирост/д</th><th class="right">ER</th></tr></thead><tbody>
-    ${sorted.map((ch,i)=>`<tr class="${i<3?'gold':''}" style="cursor:pointer" onclick="navigate('channel',${ch.id})"><td><div class="top-table-rank" style="background:${rankStyles(i)}">${i+1}</div></td><td><div style="display:flex;align-items:center;gap:10px"><div class="top-table-avatar ${ch.avatar}">${ch.name[0]}</div><div><div style="display:flex;align-items:center;gap:4px"><span class="top-table-name">${ch.name}</span>${ch.verified?`<span style="color:var(--blue)">${icons.badge}</span>`:''}</div><div class="top-table-username">${ch.username}</div></div></div></td><td class="right" style="font-weight:700;color:var(--text)">${fmt(ch.subscribers)}<br><span style="font-size:10px;color:var(--text4)">${fmtFull(ch.subscribers)}</span></td><td class="right" style="color:var(--text2)">${fmt(ch.avgViews)}</td><td class="right" style="font-weight:700;color:var(--emerald)">+${fmt(ch.growthDay)}</td><td class="right"><span class="er-badge ${ch.er>=40?'high':ch.er>=37?'mid':'low'}">${ch.er}%</span></td></tr>`).join('')}
-    </tbody></table></div></div></div>`;
+function renderTopPage() {
+  const sortBy = state.topSort;
+  const topCat = state.topCategory || 'all';
+  const sortTabs = [
+    {k:'subscribers', l:'По подписчикам', i:icons.users},
+    {k:'views',       l:'По просмотрам',  i:icons.eye},
+    {k:'growthDay',   l:'По приросту',    i:icons.trending}
+  ];
+
+  // Фильтруем и сортируем
+  let sorted = [...channels];
+  if(topCat !== 'all') sorted = sorted.filter(c => c.category === topCat);
+  sorted.sort((a,b) => b[sortBy] - a[sortBy]);
+
+  const rankStyle = i => i === 0 ? 'linear-gradient(135deg,#fbbf24,#d97706)'
+    : i === 1 ? 'linear-gradient(135deg,#94a3b8,#64748b)'
+    : i === 2 ? 'linear-gradient(135deg,#fb923c,#ea580c)'
+    : 'linear-gradient(135deg,#8b5cf6,#7c3aed)';
+
+  // Карточки категорий
+  const catList = categories; // включая 'all'
+  const catGrid = catList.map(c => {
+    const count = c.id === 'all' ? channels.length : channels.filter(ch => ch.category === c.id).length;
+    const color = catColors[c.id] || '#8b5cf6';
+    const active = topCat === c.id;
+    return `<button class="cat-card${active?' active':''}"
+      style="--cat-color:${color}"
+      onclick="state.topCategory='${c.id}';render()">
+      <div class="cat-card-glow"></div>
+      <div class="cat-card-emoji">${c.icon}</div>
+      <span class="cat-card-name">${c.name}</span>
+      <span class="cat-card-count">${count} кан.</span>
+    </button>`;
+  }).join('');
+
+  const activeCatName = topCat === 'all' ? 'Все категории' : (categories.find(c=>c.id===topCat)||{name:topCat}).name;
+  const activeCatIcon = topCat === 'all' ? '📋' : (categories.find(c=>c.id===topCat)||{icon:''}).icon;
+
+  return `<div class="detail-bar"><div class="container"><div class="detail-bar-inner">
+    <button class="back-btn" onclick="navigate('home')">${icons.back} Назад</button>
+    <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--text)">${icons.crown} Рейтинг каналов MAX</div>
+  </div></div></div>
+
+  <div class="container main-content" style="padding-top:28px;max-width:1000px">
+
+    <!-- Заголовок -->
+    <div class="top-page-title">
+      <h1>🏆 Рейтинг каналов MAX</h1>
+      <p>Выберите категорию и метрику сортировки</p>
+    </div>
+
+    <!-- Сетка категорий -->
+    <div class="cat-cards-grid">${catGrid}</div>
+
+    <!-- Сортировка -->
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px">
+      <div style="font-size:15px;font-weight:700;color:var(--text)">${activeCatIcon} ${activeCatName}
+        <span style="font-size:13px;font-weight:400;color:var(--text4);margin-left:6px">${sorted.length} каналов</span>
+      </div>
+      <div class="sort-pills">${sortTabs.map(t=>`<button class="sort-pill ${sortBy===t.k?'active':''}" onclick="state.topSort='${t.k}';render()">${t.i} ${t.l}</button>`).join('')}</div>
+    </div>
+
+    <!-- Таблица -->
+    <div class="card"><div class="table-scroll">
+      <table class="data-table top-table">
+        <thead><tr>
+          <th style="width:48px">#</th>
+          <th>Канал</th>
+          <th class="right">Подписчики</th>
+          <th class="right">Просмотры</th>
+          <th class="right">Прирост/д</th>
+          <th class="right">ER</th>
+        </tr></thead>
+        <tbody>
+          ${sorted.length === 0
+            ? `<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text4)">Нет каналов в этой категории</td></tr>`
+            : sorted.map((ch,i) => `
+            <tr class="${i<3?'gold':''}" style="cursor:pointer" onclick="navigate('channel',${ch.id})">
+              <td><div class="top-table-rank" style="background:${rankStyle(i)}">${i+1}</div></td>
+              <td><div style="display:flex;align-items:center;gap:10px">
+                <div class="top-table-avatar ${ch.avatar}">${ch.name[0]}</div>
+                <div>
+                  <div style="display:flex;align-items:center;gap:4px">
+                    <span class="top-table-name">${ch.name}</span>
+                    ${ch.verified?`<span style="color:var(--blue)">${icons.badge}</span>`:''}
+                  </div>
+                  <div class="top-table-username">${ch.username}</div>
+                </div>
+              </div></td>
+              <td class="right" style="font-weight:700;color:var(--text)">${fmt(ch.subscribers)}<br>
+                <span style="font-size:10px;color:var(--text4)">${fmtFull(ch.subscribers)}</span>
+              </td>
+              <td class="right" style="color:var(--text2)">${fmt(ch.avgViews)}</td>
+              <td class="right" style="font-weight:700;color:var(--emerald)">+${fmt(ch.growthDay)}</td>
+              <td class="right"><span class="er-badge ${ch.er>=40?'high':ch.er>=37?'mid':'low'}">${ch.er}%</span></td>
+            </tr>`).join('')
+          }
+        </tbody>
+      </table>
+    </div></div>
+
+  </div>`;
 }
 
 function renderComparePage() {
@@ -1253,7 +1563,14 @@ function renderFooter() {
     <div class="footer-col"><h4>Категории</h4>${categories.filter(c=>c.id!=='all').slice(0,7).map(c=>`<button onclick="navigate('category','${c.id}')">${c.icon} ${c.name}</button>`).join('')}</div>
     <div class="footer-col"><h4>Ещё категории</h4>${categories.filter(c=>c.id!=='all').slice(7).map(c=>`<button onclick="navigate('category','${c.id}')">${c.icon} ${c.name}</button>`).join('')}</div>
     <div class="footer-col"><h4>Инструменты</h4><button onclick="navigate('top','subscribers')">🏆 Рейтинг каналов</button><button onclick="navigate('top','views')">👁 Топ по просмотрам</button><button onclick="navigate('top','growthDay')">📈 Топ по приросту</button><button onclick="navigate('compare')">⚖️ Сравнение каналов</button><button onclick="navigate('favorites')">❤️ Избранное</button></div>
-  </div><div class="footer-bottom"><span>© 2025 MaxMetric. Все права защищены.</span><span>Данные обновляются каждый час • ${channels.length} каналов в базе</span></div></div></footer>`;
+  </div><div class="footer-bottom"><span>© 2025 MaxMetric. Все права защищены.</span><span>Данные обновляются каждый час • ${channels.length} каналов в базе</span></div>
+  </div></footer>`;
+}
+
+function renderAdminLink() {
+  return `<div style="text-align:center;margin-top:8px">
+    <button onclick="navigate('admin')" style="font-size:10px;color:var(--text4);opacity:.4;background:none;border:none;cursor:pointer;padding:4px 8px">⚙ admin</button>
+  </div>`;
 }
 
 function renderBottomNav() {
@@ -1277,17 +1594,45 @@ function renderAddModal() {
       <div class="form-group"><label class="form-label">Ссылка на канал <span class="req">*</span></label><input class="form-input" name="url" placeholder="https://max.me/mychannel" required /></div>
       <div class="form-group"><label class="form-label">Категория <span class="req">*</span></label><select class="form-select" name="category" required><option value="">Выберите категорию</option>${categories.filter(c=>c.id!=='all').map(c=>`<option value="${c.id}">${c.icon} ${c.name}</option>`).join('')}</select></div>
       <div class="form-group"><label class="form-label">Описание <span class="req">*</span></label><textarea class="form-textarea" name="description" placeholder="Расскажите о вашем канале подробно..." required minlength="20"></textarea></div>
-      <div class="form-note">📋 После отправки заявки наши модераторы проверят канал на соответствие правилам каталога. Модерация обычно занимает 1-2 рабочих дня.</div>
+      <div class="form-group"><label class="form-label">Контакт для связи</label><input class="form-input" name="contacts" placeholder="@username или email (необязательно)" /></div>
+      <div class="form-note">📋 После отправки заявки модераторы проверят канал. Обычно это занимает 1–2 рабочих дня.</div>
       <button type="submit" class="submit-btn">Отправить на модерацию</button>
     </form>
   </div></div></div>`;
 }
 
-function handleAddSubmit(e) {
+async function handleAddSubmit(e) {
   e.preventDefault();
+  const form = e.target;
   const body = document.getElementById('modal-body');
-  body.innerHTML = `<div class="success-state"><div class="success-icon grad-emerald" style="color:#fff">${icons.check}</div><div class="empty-title">Заявка отправлена!</div><div class="empty-desc">Ваш канал будет проверен модераторами</div><div style="font-size:12px;color:var(--text4)">Обычно модерация занимает 1-2 рабочих дня</div><div class="progress-bar"><div class="progress-fill"></div></div></div>`;
-  setTimeout(()=>{state.showModal=false;render();},2500);
+
+  const data = {
+    name:        form.name.value.trim(),
+    url:         form.url.value.trim(),
+    username:    form.url.value.trim().replace(/.*\//, '@'),
+    category:    form.category.value,
+    description: form.description.value.trim(),
+    contacts:    form.contacts ? form.contacts.value.trim() : ''
+  };
+
+  // Показываем лоадер
+  body.innerHTML = `<div class="success-state"><div style="font-size:40px">⏳</div><div class="empty-title">Отправляем заявку...</div></div>`;
+
+  try {
+    if(window._fbReady) {
+      await window.fbSubmitChannel(data);
+      body.innerHTML = `<div class="success-state"><div class="success-icon grad-emerald" style="color:#fff">${icons.check}</div><div class="empty-title">Заявка отправлена!</div><div class="empty-desc">Ваш канал будет проверен модераторами в течение 1–2 рабочих дней</div><div class="progress-bar"><div class="progress-fill"></div></div></div>`;
+    } else {
+      // Firebase ещё не загрузился — ждём
+      await new Promise(res => window.addEventListener('fbReady', res, {once:true}));
+      await window.fbSubmitChannel(data);
+      body.innerHTML = `<div class="success-state"><div class="success-icon grad-emerald" style="color:#fff">${icons.check}</div><div class="empty-title">Заявка отправлена!</div><div class="empty-desc">Ваш канал будет проверен модераторами в течение 1–2 рабочих дней</div><div class="progress-bar"><div class="progress-fill"></div></div></div>`;
+    }
+  } catch(err) {
+    body.innerHTML = `<div class="success-state"><div style="font-size:40px">❌</div><div class="empty-title">Ошибка отправки</div><div class="empty-desc">${err.message}</div><button class="primary-btn" onclick="state.showModal=false;render()">Закрыть</button></div>`;
+    return;
+  }
+  setTimeout(()=>{state.showModal=false;render();}, 3000);
 }
 
 function renderShareModal() {
@@ -1386,6 +1731,7 @@ function renderProfilePage() {
       <div class="profile-hero-bg"><div class="profile-hero-pattern"></div>
         <div style="position:absolute;top:12px;right:16px;display:flex;gap:8px">
           <button onclick="navigate('home')" style="padding:7px 14px;border-radius:10px;background:rgba(255,255,255,.15);color:#fff;font-size:12px;font-weight:600;border:1px solid rgba(255,255,255,.2);backdrop-filter:blur(8px)">← Каталог</button>
+          ${adminLoggedIn ? `<button onclick="navigate('admin')" style="padding:7px 14px;border-radius:10px;background:rgba(255,255,255,.15);color:#fff;font-size:12px;font-weight:600;border:1px solid rgba(255,255,255,.25);backdrop-filter:blur(8px)">🛡 Модерация</button>` : ''}
           <button onclick="doLogout()" style="padding:7px 14px;border-radius:10px;background:rgba(239,68,68,.2);color:#fff;font-size:12px;font-weight:600;border:1px solid rgba(239,68,68,.3);backdrop-filter:blur(8px)">${icons.logout} Выйти</button>
         </div>
       </div>
@@ -1554,8 +1900,44 @@ function deleteAccount() {
   render();
 }
 
+// Keyboard navigation index for search dropdown
+let _hsNavIdx = -1;
+
+function hsKeyNav(e) {
+  const dd = document.getElementById('hs-dropdown');
+  if(!dd || dd.style.display === 'none') {
+    if(e.key === 'Escape') headerSearchClear();
+    return;
+  }
+  const items = dd.querySelectorAll('.hs-dropdown-item');
+  if(e.key === 'ArrowDown') {
+    e.preventDefault();
+    _hsNavIdx = Math.min(_hsNavIdx + 1, items.length - 1);
+    items.forEach((el,i) => el.classList.toggle('hs-active', i === _hsNavIdx));
+  } else if(e.key === 'ArrowUp') {
+    e.preventDefault();
+    _hsNavIdx = Math.max(_hsNavIdx - 1, 0);
+    items.forEach((el,i) => el.classList.toggle('hs-active', i === _hsNavIdx));
+  } else if(e.key === 'Enter') {
+    e.preventDefault();
+    if(_hsNavIdx >= 0 && items[_hsNavIdx]) items[_hsNavIdx].click();
+    else if(items.length > 0) items[0].click();
+  } else if(e.key === 'Escape') {
+    dd.style.display = 'none';
+    _hsNavIdx = -1;
+  }
+}
+
 function bindEvents() {
-  // No dropdowns to close now (profile is a full page)
+  // Close search dropdown on outside click
+  document.addEventListener('click', e => {
+    const hs = document.querySelector('.header-search');
+    const dd = document.getElementById('hs-dropdown');
+    if(dd && hs && !hs.contains(e.target)) {
+      dd.style.display = 'none';
+      _hsNavIdx = -1;
+    }
+  });
   // Init ad slider on every render (only if on home page)
   requestAnimationFrame(() => {
     if(document.getElementById('ad-track')) {
@@ -1666,7 +2048,204 @@ function adSliderInit() {
   }
 }
 
+
+// ========== ADMIN PANEL ==========
+const ADMIN_PASS = 'maxmetric2026'; // Пароль для входа в панель
+let adminLoggedIn = sessionStorage.getItem('mm_admin') === '1';
+let adminSubmissions = [];
+let adminTab = 'pending'; // pending | approved | rejected
+
+function adminLogin() {
+  const inp = document.getElementById('admin-pass-input');
+  if(!inp) return;
+  if(inp.value === ADMIN_PASS) {
+    adminLoggedIn = true;
+    sessionStorage.setItem('mm_admin', '1');
+    loadAdminSubmissions();
+  } else {
+    inp.style.borderColor = 'var(--red)';
+    inp.placeholder = 'Неверный пароль';
+    inp.value = '';
+  }
+}
+
+async function loadAdminSubmissions() {
+  if(!adminLoggedIn) { render(); return; }
+  const el = document.getElementById('admin-list');
+  if(el) el.innerHTML = '<div class="admin-loading">⏳ Загружаем заявки...</div>';
+  try {
+    if(!window._fbReady) await new Promise(res => window.addEventListener('fbReady', res, {once:true}));
+    adminSubmissions = await window.fbLoadAll();
+  } catch(e) {
+    if(el) el.innerHTML = `<div class="admin-empty">❌ Ошибка: ${e.message}</div>`;
+    return;
+  }
+  renderAdminList();
+}
+
+function renderAdminList() {
+  const el = document.getElementById('admin-list');
+  if(!el) return;
+  const filtered = adminSubmissions.filter(s => s.status === adminTab);
+  if(filtered.length === 0) {
+    el.innerHTML = `<div class="admin-empty">✅ Нет заявок со статусом «${adminTab === 'pending' ? 'На рассмотрении' : adminTab === 'approved' ? 'Одобрено' : 'Отклонено'}»</div>`;
+    return;
+  }
+  el.innerHTML = filtered.map(s => {
+    const cat = categories.find(c => c.id === s.category) || {name: s.category, icon: '📋'};
+    const date = s.createdAt ? new Date(s.createdAt.seconds * 1000).toLocaleDateString('ru-RU') : '—';
+    return `<div class="admin-item">
+      <div class="admin-item-header">
+        <div class="admin-item-icon">${cat.icon}</div>
+        <div style="flex:1;min-width:0">
+          <div class="admin-item-name">${escHtml(s.name)}</div>
+          <a class="admin-item-url" href="${escHtml(s.url)}" target="_blank">${escHtml(s.url)}</a>
+        </div>
+        <div class="admin-item-date">${date}</div>
+      </div>
+      <div class="admin-item-desc">${escHtml(s.description || '—')}</div>
+      <div class="admin-item-meta">
+        <span class="admin-item-tag cat">${cat.icon} ${cat.name}</span>
+        <span class="admin-item-tag ${s.status}">${s.status === 'pending' ? '⏳ На рассмотрении' : s.status === 'approved' ? '✅ Одобрено' : '❌ Отклонено'}</span>
+        ${s.contacts ? `<span class="admin-item-tag" style="background:var(--bg3);color:var(--text3)">📞 ${escHtml(s.contacts)}</span>` : ''}
+      </div>
+      <div class="admin-actions">
+        ${s.status !== 'approved' ? `<button class="admin-btn approve" onclick="adminSetStatus('${s._fbId}','approved')">✅ Одобрить</button>` : ''}
+        ${s.status !== 'rejected' ? `<button class="admin-btn reject"  onclick="adminSetStatus('${s._fbId}','rejected')">❌ Отклонить</button>` : ''}
+        <a class="admin-btn view" href="${escHtml(s.url)}" target="_blank">🔗 Открыть</a>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Обновляем счётчики табов
+  ['pending','approved','rejected'].forEach(t => {
+    const btn = document.getElementById('admin-tab-' + t);
+    if(btn) {
+      const count = adminSubmissions.filter(s => s.status === t).length;
+      btn.textContent = {pending:'⏳ На рассмотрении', approved:'✅ Одобрено', rejected:'❌ Отклонено'}[t] + (count ? ` (${count})` : '');
+    }
+  });
+}
+
+async function adminSetStatus(id, status) {
+  try {
+    if(!window._fbReady) await new Promise(res => window.addEventListener('fbReady', res, {once:true}));
+    await window.fbSetStatus(id, status);
+    const item = adminSubmissions.find(s => s._fbId === id);
+    if(item) item.status = status;
+    renderAdminList();
+
+    // Если одобрили — подгружаем одобренные каналы
+    if(status === 'approved') loadApprovedChannels();
+  } catch(e) {
+    alert('Ошибка: ' + e.message);
+  }
+}
+
+function renderAdminPage() {
+  if(!adminLoggedIn) {
+    return `<div class="container main-content">
+      <div class="admin-login">
+        <h2>🔐 Панель модератора</h2>
+        <p>Введите пароль для доступа к заявкам</p>
+        <input id="admin-pass-input" class="form-input" type="password" placeholder="Пароль"
+          onkeydown="if(event.key==='Enter')adminLogin()" style="margin-bottom:12px" />
+        <button class="submit-btn" onclick="adminLogin()">Войти</button>
+      </div>
+    </div>`;
+  }
+
+  const total   = adminSubmissions.length;
+  const pending  = adminSubmissions.filter(s => s.status === 'pending').length;
+  const approved = adminSubmissions.filter(s => s.status === 'approved').length;
+  const rejected = adminSubmissions.filter(s => s.status === 'rejected').length;
+
+  return `
+  <div class="detail-bar"><div class="container"><div class="detail-bar-inner">
+    <button class="back-btn" onclick="navigate('home')">${icons.back} Назад</button>
+    <span style="font-size:13px;font-weight:600;color:var(--text)">🛡️ Панель модератора</span>
+    <button class="admin-btn view" style="margin-left:auto" onclick="loadAdminSubmissions()">🔄 Обновить</button>
+  </div></div></div>
+
+  <div class="container main-content">
+    <div class="admin-wrap">
+
+      <div class="admin-header-card">
+        <div class="admin-title">🛡️ Панель модератора MaxMetric</div>
+        <div class="admin-sub">Управление заявками на добавление каналов</div>
+        <div class="admin-stats-row">
+          <div class="admin-stat"><span>${total}</span>Всего</div>
+          <div class="admin-stat"><span>${pending}</span>Ожидают</div>
+          <div class="admin-stat"><span>${approved}</span>Одобрено</div>
+          <div class="admin-stat"><span>${rejected}</span>Отклонено</div>
+        </div>
+      </div>
+
+      <div class="admin-tabs">
+        <button id="admin-tab-pending"  class="admin-tab ${adminTab==='pending' ?'active':''}" onclick="adminTab='pending'; renderAdminList()">⏳ На рассмотрении (${pending})</button>
+        <button id="admin-tab-approved" class="admin-tab ${adminTab==='approved'?'active':''}" onclick="adminTab='approved';renderAdminList()">✅ Одобрено (${approved})</button>
+        <button id="admin-tab-rejected" class="admin-tab ${adminTab==='rejected'?'active':''}" onclick="adminTab='rejected';renderAdminList()">❌ Отклонено (${rejected})</button>
+      </div>
+
+      <div id="admin-list">
+        <div class="admin-loading">⏳ Загружаем заявки...</div>
+      </div>
+
+    </div>
+  </div>`;
+}
+
+// ========== LOAD APPROVED CHANNELS FROM FIREBASE ==========
+async function loadApprovedChannels() {
+  try {
+    if(!window._fbReady) return; // тихо пропускаем если FB ещё не готов
+    const approved = await window.fbLoadApproved();
+    approved.forEach(ch => {
+      // Добавляем только если нет уже в массиве
+      if(!channels.find(c => c._fbId === ch._fbId)) {
+        const newId = Math.max(...channels.map(c=>c.id)) + 1;
+        channels.push({
+          id: newId,
+          name: ch.name || 'Без названия',
+          username: ch.username || ch.url || '',
+          category: ch.category || 'other',
+          desc: ch.description || '',
+          subscribers: 0, views: 0, growthDay: 0, growthWeek: 0,
+          growthMonth: 0, avgViews: 0, er: 0, verified: false,
+          postsPerDay: 0, totalPosts: 0,
+          tags: [],
+          avatarIdx: Math.floor(Math.random() * 8),
+          history: { subscribers: Array(12).fill(0) },
+          _fbId: ch._fbId
+        });
+      }
+    });
+    if(state.page === 'home') updateChannelGrid();
+  } catch(e) {
+    console.warn('Не удалось загрузить одобренные каналы:', e);
+  }
+}
+
+// Запускаем загрузку одобренных каналов при готовности Firebase
+window.addEventListener('fbReady', () => {
+  loadApprovedChannels();
+});
+
 // Init
+
+// Открыть админку через URL: file.html#admin или site.com/#admin
+if(window.location.hash === '#admin') {
+  state.page = 'admin';
+  loadAdminSubmissions();
+}
+
+// Горячая клавиша Alt+A
+document.addEventListener('keydown', e => {
+  if(e.altKey && e.key.toLowerCase() === 'a') {
+    navigate('admin');
+  }
+});
+
 render();
 </script>
 </body>
