@@ -2252,33 +2252,29 @@ function parseOneMeData(d, username) {
   };
 }
 
-// Запрос к API: прямой + через CORS-прокси как fallback
+// Запрос к нашему бэкенду, который уже ходит в MAX API
+const BACKEND_MAX_ENDPOINT = 'https://YOUR_BACKEND_URL/api/max-channel';
+
 async function fetchChannelFromAPI(username) {
   const u = username.replace(/^@/, '');
-  const endpoints = [
-    `https://api.oneme.ru/api/channels/${u}`,
-    `https://api.oneme.ru/api/channel/${u}`,
-    `https://api.oneme.ru/api/user/${u}`,
-    `https://api.oneme.ru/v1/channels/${u}`,
-  ];
-  // 1) Прямые запросы
-  for (const url of endpoints) {
-    try {
-      const r = await fetch(url, { headers: { Accept: 'application/json' }, signal: AbortSignal.timeout(5000) });
-      if (r.ok) { const parsed = parseOneMeData(await r.json(), u); if (parsed) return parsed; }
-    } catch(_) {}
+  try {
+    const url = `${BACKEND_MAX_ENDPOINT}?username=${encodeURIComponent(u)}`;
+    const r = await fetch(url, { headers: { 'Accept': 'application/json' }, signal: AbortSignal.timeout(8000) });
+    if (!r.ok) return null;
+    const data = await r.json();
+    if (!data || typeof data !== 'object') return null;
+    return {
+      name:        String(data.name || u),
+      avatarUrl:   String(data.avatarUrl || ''),
+      subscribers: Number(data.subscribers) || 0,
+      avgViews:    Number(data.avgViews)    || 0,
+      totalPosts:  Number(data.totalPosts)  || 0,
+      postsPerDay: Number(data.postsPerDay) || 0,
+      verified:    !!data.verified
+    };
+  } catch(_) {
+    return null;
   }
-  // 2) Через CORS-прокси (решает проблему CORS без серверной части)
-  for (const url of endpoints) {
-    try {
-      const r = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`, { signal: AbortSignal.timeout(8000) });
-      if (r.ok) {
-        const w = await r.json();
-        if (w.contents) { const parsed = parseOneMeData(JSON.parse(w.contents), u); if (parsed) return parsed; }
-      }
-    } catch(_) {}
-  }
-  return null;
 }
 
 // Синхронизировать один канал: API → Firebase → локальный массив
