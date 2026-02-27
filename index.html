@@ -54,12 +54,9 @@ window.fbSetStatus = async (id, status) => {
   await updateDoc(doc(db, 'submissions', id), { status });
 };
 
-// Обновить статистику канала (данные из api.oneme.ru)
+// Обновить статистику канала после получения данных из API
 window.fbUpdateChannelStats = async (id, stats) => {
-  await updateDoc(doc(db, 'submissions', id), {
-    ...stats,
-    statsUpdatedAt: serverTimestamp()
-  });
+  await updateDoc(doc(db, 'submissions', id), { ...stats, statsUpdatedAt: serverTimestamp() });
 };
 
 // Сигнал что Firebase готов
@@ -310,7 +307,8 @@ input,select,textarea { font-family:inherit; }
 .ch-act-btn.cmp-active { background:rgba(139,92,246,.1); color:var(--violet); }
 .ch-top { display:flex; gap:14px; }
 .ch-avatar { width:52px; height:52px; border-radius:14px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:20px; font-weight:700; flex-shrink:0; }
-img.ch-avatar, img.ch-big-avatar, img.top-avatar, img.top-table-avatar, img.recent-avatar, img.hs-dropdown-avatar, img.compare-avatar { display:block; object-fit:cover; }
+/* Аватары-картинки из API — одинаковые размеры и форма */
+img.ch-avatar, img.ch-big-avatar, img.top-avatar, img.top-table-avatar, img.recent-avatar, img.hs-dropdown-avatar, img.compare-avatar { display:block; object-fit:cover; flex-shrink:0; }
 .ch-info { flex:1; min-width:0; }
 .ch-name-row { display:flex; align-items:center; gap:6px; margin-bottom:2px; }
 .ch-name { font-size:15px; font-weight:700; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; transition:color .2s; }
@@ -753,12 +751,13 @@ const channels = rawChannels.map(ch => ({
 function fmt(n) { if(n>=1e6) return (n/1e6).toFixed(1)+'M'; if(n>=1e3) return (n/1e3).toFixed(1)+'K'; return ''+n; }
 function fmtFull(n) { return n.toLocaleString('ru-RU'); }
 
-// Рендер аватара: если есть URL из API — показываем картинку, иначе градиент с буквой
-function renderAvatar(ch, className) {
+// Рендер аватара: если есть реальное фото из API — показываем, иначе градиент с буквой
+function renderAvatar(ch, cls) {
   if (ch.avatarUrl) {
-    return `<img class="${className}" src="${ch.avatarUrl}" alt="${ch.name}" style="object-fit:cover" onerror="this.outerHTML='<div class=\\'${className} ${ch.avatar || avatarGrads[0]}\\'>${(ch.name||'?')[0]}</div>'" />`;
+    const fallback = `this.style.display='none';this.nextElementSibling.style.display='flex'`;
+    return `<img class="${cls}" src="${ch.avatarUrl}" alt="" style="object-fit:cover;flex-shrink:0" onerror="${fallback}"/><div class="${cls} ${ch.avatar||avatarGrads[0]}" style="display:none">${(ch.name||'?')[0]}</div>`;
   }
-  return `<div class="${className} ${ch.avatar || avatarGrads[0]}">${(ch.name||'?')[0]}</div>`;
+  return `<div class="${cls} ${ch.avatar||avatarGrads[0]}">${(ch.name||'?')[0]}</div>`;
 }
 function getCat(id) { const c=categories.find(x=>x.id===id); return c?c.name:id; }
 function getCatIcon(id) { const c=categories.find(x=>x.id===id); return c?c.icon:'📋'; }
@@ -1385,7 +1384,7 @@ function renderChannelPage() {
   html += `<div class="container" style="padding-top:24px">`;
 
   // Header card
-  html += `<div class="ch-header-card"><div class="ch-banner ${ch.avatar}" style="position:relative">${ch.avatarUrl?`<img src="${ch.avatarUrl}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.25;filter:blur(8px)" onerror="this.remove()">`:''}  <div style="position:absolute;inset:0;background:rgba(0,0,0,.1)"></div></div>
+  html += `<div class="ch-header-card"><div class="ch-banner ${ch.avatar}" style="position:relative">${ch.avatarUrl?`<img src="${ch.avatarUrl}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.2;filter:blur(12px)" onerror="this.remove()">`:''}<div style="position:absolute;inset:0;background:rgba(0,0,0,.1)"></div></div>
     <div class="ch-header-body"><div class="ch-header-top">${renderAvatar(ch,'ch-big-avatar')}
       <div class="ch-header-info"><div class="ch-big-name">${ch.name} ${ch.verified?icons.badge:''}</div><div class="ch-big-username">${ch.username}</div>
         <div class="ch-full-desc">${ch.fullDesc}</div>
@@ -1559,7 +1558,7 @@ function renderComparePage() {
 
   return `<div class="detail-bar"><div class="container"><div class="detail-bar-inner"><button class="back-btn" onclick="navigate('home')">${icons.back} Назад</button><span style="font-size:13px;font-weight:600;color:var(--text)">⚖️ Сравнение каналов (${chs.length})</span></div></div></div>
   <div class="container main-content" style="padding-top:24px"><h1 style="text-align:center;font-size:24px;font-weight:800;color:var(--text);margin-bottom:24px">⚖️ Сравнение каналов</h1>
-  <div class="card"><div class="table-scroll"><table class="compare-table"><thead><tr><th style="text-align:left">Метрика</th>${chs.map(ch=>`<th><div style="display:flex;flex-direction:column;align-items:center;gap:8px"><div class="compare-avatar" onclick="navigate('channel',${ch.id})" style="overflow:hidden">${renderAvatar(ch,'compare-avatar')}<button class="compare-remove" onclick="event.stopPropagation();toggleCompare(${ch.id})">×</button></div><span style="font-size:12px;font-weight:600;color:var(--text);cursor:pointer" onclick="navigate('channel',${ch.id})">${ch.name}</span></div></th>`).join('')}</tr></thead><tbody>
+  <div class="card"><div class="table-scroll"><table class="compare-table"><thead><tr><th style="text-align:left">Метрика</th>${chs.map(ch=>`<th><div style="display:flex;flex-direction:column;align-items:center;gap:8px"><div style="position:relative;cursor:pointer" onclick="navigate('channel',${ch.id})">${renderAvatar(ch,'compare-avatar')}<button class="compare-remove" onclick="event.stopPropagation();toggleCompare(${ch.id})">×</button></div><span style="font-size:12px;font-weight:600;color:var(--text);cursor:pointer" onclick="navigate('channel',${ch.id})">${ch.name}</span></div></th>`).join('')}</tr></thead><tbody>
   <tr><td style="font-size:13px;font-weight:500;color:var(--text2)">📈 График</td>${chs.map(ch=>`<td><div style="display:flex;justify-content:center">${makeSvgSpark(ch.history,'subscribers','#8b5cf6',120,40)}</div></td>`).join('')}</tr>
   ${metrics.map(m=>{const b=best(m.k);return `<tr><td><div class="metric-cell">${m.i}<span style="font-size:13px;font-weight:500;color:var(--text2)">${m.l}</span></div></td>${chs.map(ch=>{const v=ch[m.k];const isB=v===b&&chs.length>1;return `<td><span style="font-size:13px;font-weight:700;color:${isB?'var(--emerald)':m.g?'var(--violet)':'var(--text)'}">${m.f(v)}</span>${isB?'<span class="best-badge">лучший</span>':''}</td>`;}).join('')}</tr>`;}).join('')}
   </tbody></table></div></div></div>`;
@@ -1612,7 +1611,7 @@ function renderAddModal() {
       <div class="form-group"><label class="form-label">Категория <span class="req">*</span></label><select class="form-select" name="category" required><option value="">Выберите категорию</option>${categories.filter(c=>c.id!=='all').map(c=>`<option value="${c.id}">${c.icon} ${c.name}</option>`).join('')}</select></div>
       <div class="form-group"><label class="form-label">Описание <span class="req">*</span></label><textarea class="form-textarea" name="description" placeholder="Расскажите о вашем канале подробно..." required minlength="20"></textarea></div>
       <div class="form-group"><label class="form-label">Контакт для связи</label><input class="form-input" name="contacts" placeholder="@username или email" /></div>
-      <div class="form-note">✨ Название, аватарка, количество подписчиков и просмотров загрузятся автоматически из MAX после одобрения заявки и будут обновляться каждые 4 часа.</div>
+      <div class="form-note">✨ Название канала, аватарка, подписчики и просмотры загружаются автоматически из MAX после одобрения и обновляются каждые 4 часа.</div>
       <button type="submit" class="submit-btn">Отправить на модерацию</button>
     </form>
   </div></div></div>`;
@@ -1623,24 +1622,18 @@ async function handleAddSubmit(e) {
   const form = e.target;
   const body = document.getElementById('modal-body');
 
-  const rawUsername = form.username.value.trim();
-  const username = (rawUsername.startsWith('@') ? '' : '@') + rawUsername.replace('@','');
+  const rawUser = form.username.value.trim();
+  const username = (rawUser.startsWith('@') ? rawUser : '@' + rawUser);
 
   const data = {
-    name:        '',  // будет заполнено из API после одобрения
+    name:        '',
     username:    username,
     url:         form.url.value.trim(),
     category:    form.category.value,
     description: form.description.value.trim(),
     contacts:    form.contacts ? form.contacts.value.trim() : '',
-    // Статистика заполняется автоматически из api.oneme.ru
-    subscribers: 0,
-    avgViews:    0,
-    growthDay:   0,
-    growthWeek:  0,
-    growthMonth: 0,
-    postsPerDay: 0,
-    avatarUrl:   '',
+    subscribers: 0, avgViews: 0, growthDay: 0,
+    postsPerDay: 0, totalPosts: 0, avatarUrl: '', verified: false,
     statsUpdatedAt: null
   };
 
@@ -2164,14 +2157,14 @@ async function adminSetStatus(id, status) {
     if(item) item.status = status;
     renderAdminList();
 
-    // Если одобрили — подгружаем каналы и сразу синхронизируем статистику из API
     if(status === 'approved') {
       await loadApprovedChannels();
-      // Запускаем немедленную синхронизацию для только что одобренного канала
-      if(item && item.username) {
-        const ch = channels.find(c => c._fbId === id);
-        const ok = await syncChannelStats(id, item.username, ch);
-        if(ok && state.page === 'home') updateChannelGrid();
+      // Немедленно синхронизируем данные одобренного канала из API
+      if (item && item.username) {
+        const uname = item.username.replace(/^@/, '');
+        syncOneChannel(id, uname).then(ok => {
+          if (ok) { if (state.page === 'home') updateChannelGrid(); }
+        });
       }
     }
   } catch(e) {
@@ -2232,111 +2225,84 @@ function renderAdminPage() {
   </div>`;
 }
 
-// ========== ONEME API INTEGRATION ==========
+// ═══════════════════════════════════════════════════
+// ONEME API — автоматическое получение данных каналов
+// ═══════════════════════════════════════════════════
 
-// Получить данные канала по username с api.oneme.ru
-async function fetchOneMeStats(username) {
-  const clean = username.replace(/^@/, '');
-  try {
-    // Пробуем основной эндпоинт
-    const res = await fetch(`https://api.oneme.ru/api/channel/${clean}`, {
-      headers: { 'Accept': 'application/json' }
-    });
-    if (res.ok) {
-      const d = await res.json();
-      return normalizeOneMeResponse(d, clean);
-    }
-  } catch(e) {}
-
-  try {
-    // Пробуем альтернативный эндпоинт
-    const res2 = await fetch(`https://api.oneme.ru/v1/channels/${clean}`);
-    if (res2.ok) {
-      const d = await res2.json();
-      return normalizeOneMeResponse(d, clean);
-    }
-  } catch(e) {}
-
-  try {
-    // Пробуем через username lookup
-    const res3 = await fetch(`https://api.oneme.ru/api/user/${clean}`);
-    if (res3.ok) {
-      const d = await res3.json();
-      return normalizeOneMeResponse(d, clean);
-    }
-  } catch(e) {}
-
-  return null;
-}
-
-// Нормализовать ответ API в наш формат (разные варианты структуры)
-function normalizeOneMeResponse(d, username) {
-  if (!d) return null;
-  // Пробуем вытащить данные из разных возможных структур ответа
-  const data = d.data || d.channel || d.user || d.result || d;
-
-  const subscribers = data.subscribers_count ?? data.subscribers ?? data.members_count
-    ?? data.membersCount ?? data.followersCount ?? data.followers_count ?? 0;
-  const views = data.views_count ?? data.views ?? data.total_views ?? data.totalViews ?? 0;
-  const avgViews = data.avg_views ?? data.avgViews ?? data.average_views
-    ?? (views > 0 ? Math.round(views / Math.max(data.posts_count || 1, 1)) : 0);
-  const postsCount = data.posts_count ?? data.postsCount ?? data.messages_count ?? 0;
-
-  const name = data.title ?? data.name ?? data.display_name ?? data.displayName ?? username;
-  const avatarUrl = data.avatar ?? data.avatar_url ?? data.avatarUrl
-    ?? data.photo ?? data.photo_url ?? data.photoUrl ?? data.image ?? data.image_url ?? '';
-
+// Парсим ответ API в единый формат (API может иметь разную структуру)
+function parseOneMeData(d, username) {
+  if (!d || typeof d !== 'object') return null;
+  const o = d.data || d.channel || d.group || d.chat || d.user || d.result || d;
+  if (!o || typeof o !== 'object') return null;
+  const sub  = o.subscribers_count ?? o.membersCount  ?? o.members_count ?? o.subscribers ?? o.followersCount ?? o.followers_count ?? o.members ?? 0;
+  const views = o.views_count ?? o.total_views ?? o.totalViews ?? o.views ?? 0;
+  const posts = o.posts_count ?? o.postsCount ?? o.messages_count ?? 0;
+  const avgV  = o.avg_views ?? o.avgViews ?? (views > 0 && posts > 0 ? Math.round(views / posts) : 0);
+  const name  = o.title ?? o.name ?? o.display_name ?? o.displayName ?? username ?? '';
+  const avatar = o.avatar_url ?? o.avatarUrl ?? o.avatar ?? o.photo_url ?? o.photoUrl ?? o.photo ?? o.image ?? '';
+  if (!sub && !name) return null;
   return {
-    name:        name,
-    avatarUrl:   avatarUrl,
-    subscribers: Number(subscribers) || 0,
-    avgViews:    Number(avgViews) || 0,
-    totalPosts:  Number(postsCount) || 0,
-    postsPerDay: data.posts_per_day ?? data.postsPerDay ?? 0,
-    verified:    data.verified ?? data.is_verified ?? false,
-    views:       Number(views) || 0
+    name:        String(name),
+    avatarUrl:   String(avatar),
+    subscribers: Number(sub)   || 0,
+    avgViews:    Number(avgV)  || 0,
+    totalPosts:  Number(posts) || 0,
+    postsPerDay: Number(o.posts_per_day ?? o.postsPerDay ?? 0) || 0,
+    verified:    !!(o.verified ?? o.is_verified ?? false)
   };
 }
 
-// Сохранить свежую статистику в Firebase и обновить локальный массив channels
-async function syncChannelStats(fbId, username, existingChannel) {
-  const stats = await fetchOneMeStats(username);
-  if (!stats) return false;
-
-  // Обновляем в Firebase
-  if (window._fbReady) {
+// Запрос к API: прямой + через CORS-прокси как fallback
+async function fetchChannelFromAPI(username) {
+  const u = username.replace(/^@/, '');
+  const endpoints = [
+    `https://api.oneme.ru/api/channels/${u}`,
+    `https://api.oneme.ru/api/channel/${u}`,
+    `https://api.oneme.ru/api/user/${u}`,
+    `https://api.oneme.ru/v1/channels/${u}`,
+  ];
+  // 1) Прямые запросы
+  for (const url of endpoints) {
     try {
-      const update = {
-        name:       stats.name || existingChannel?.name || '',
-        avatarUrl:  stats.avatarUrl || '',
-        subscribers: stats.subscribers,
-        avgViews:    stats.avgViews,
-        postsPerDay: stats.postsPerDay,
-        totalPosts:  stats.totalPosts,
-        verified:    stats.verified
-      };
-      await window.fbUpdateChannelStats(fbId, update);
-    } catch(e) {
-      console.warn('Не удалось сохранить статистику в Firebase:', e);
-    }
+      const r = await fetch(url, { headers: { Accept: 'application/json' }, signal: AbortSignal.timeout(5000) });
+      if (r.ok) { const parsed = parseOneMeData(await r.json(), u); if (parsed) return parsed; }
+    } catch(_) {}
   }
+  // 2) Через CORS-прокси (решает проблему CORS без серверной части)
+  for (const url of endpoints) {
+    try {
+      const r = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`, { signal: AbortSignal.timeout(8000) });
+      if (r.ok) {
+        const w = await r.json();
+        if (w.contents) { const parsed = parseOneMeData(JSON.parse(w.contents), u); if (parsed) return parsed; }
+      }
+    } catch(_) {}
+  }
+  return null;
+}
 
-  // Обновляем локальный массив channels
+// Синхронизировать один канал: API → Firebase → локальный массив
+async function syncOneChannel(fbId, username) {
+  const stats = await fetchChannelFromAPI(username);
+  if (!stats) return false;
+  if (window._fbReady) {
+    try { await window.fbUpdateChannelStats(fbId, { name: stats.name, avatarUrl: stats.avatarUrl, subscribers: stats.subscribers, avgViews: stats.avgViews, postsPerDay: stats.postsPerDay, totalPosts: stats.totalPosts, verified: stats.verified }); }
+    catch(e) {}
+  }
   const ch = channels.find(c => c._fbId === fbId);
   if (ch) {
-    ch.name        = stats.name || ch.name;
-    ch.avatarUrl   = stats.avatarUrl || ch.avatarUrl || '';
+    if (stats.name)      ch.name      = stats.name;
+    if (stats.avatarUrl) ch.avatarUrl = stats.avatarUrl;
     ch.subscribers = stats.subscribers;
     ch.avgViews    = stats.avgViews;
     ch.postsPerDay = stats.postsPerDay;
     ch.totalPosts  = stats.totalPosts;
     ch.verified    = stats.verified;
-    // Обновляем историю — добавляем точку сегодня
-    if (ch.history && Array.isArray(ch.history)) {
+    if (Array.isArray(ch.history)) {
       const today = new Date().toISOString().split('T')[0];
-      const last = ch.history[ch.history.length - 1];
-      const growth = last ? Math.max(0, stats.subscribers - (last.subscribers || 0)) : 0;
-      ch.history.push({ date: today, subscribers: stats.subscribers, views: stats.avgViews, growth });
+      const last  = ch.history[ch.history.length - 1];
+      if (!last || last.date !== today) ch.history.push({ date: today, subscribers: stats.subscribers, views: stats.avgViews, growth: last ? Math.max(0, stats.subscribers - last.subscribers) : 0 });
+      else { last.subscribers = stats.subscribers; last.views = stats.avgViews; }
     }
   }
   return true;
@@ -2347,76 +2313,68 @@ async function loadApprovedChannels() {
   try {
     if (!window._fbReady) return;
     const approved = await window.fbLoadApproved();
-
     for (const ch of approved) {
       const exists = channels.find(c => c._fbId === ch._fbId);
       if (!exists) {
-        const newId = Math.max(...channels.map(c => c.id)) + 1;
-        const newCh = {
-          id:          newId,
-          name:        ch.name || ch.username || 'Канал',
-          username:    ch.username || '',
-          url:         ch.url || '',
-          category:    ch.category || 'other',
-          desc:        ch.description || '',
-          fullDesc:    ch.description || '',
-          subscribers: ch.subscribers || 0,
-          views:       ch.views || 0,
-          avgViews:    ch.avgViews || 0,
-          growthDay:   ch.growthDay || 0,
-          growthWeek:  ch.growthWeek || 0,
-          growthMonth: ch.growthMonth || 0,
-          postsPerDay: ch.postsPerDay || 0,
-          totalPosts:  ch.totalPosts || 0,
-          er:          ch.er || 0,
-          verified:    ch.verified || false,
-          tags:        ch.tags || [],
-          avatarUrl:   ch.avatarUrl || '',
+        const newId = channels.length ? Math.max(...channels.map(c => c.id)) + 1 : 1000;
+        channels.push({
+          id: newId,
+          name:        ch.name       || ch.username || 'Канал',
+          username:    ch.username   || '',
+          url:         ch.url        || '',
+          category:    ch.category   || 'other',
+          desc:        ch.description|| '',
+          fullDesc:    ch.description|| '',
+          subscribers: Number(ch.subscribers) || 0,
+          avgViews:    Number(ch.avgViews)    || 0,
+          growthDay:   Number(ch.growthDay)   || 0,
+          growthWeek:  Number(ch.growthWeek)  || 0,
+          growthMonth: Number(ch.growthMonth) || 0,
+          postsPerDay: Number(ch.postsPerDay) || 0,
+          totalPosts:  Number(ch.totalPosts)  || 0,
+          er:          Number(ch.er)          || 0,
+          verified:    ch.verified            || false,
+          tags:        ch.tags               || [],
+          avatarUrl:   ch.avatarUrl          || '',
           avatar:      avatarGrads[Math.floor(Math.random() * avatarGrads.length)],
-          history:     genHistory(ch.subscribers || 1000, ch.avgViews || 500, 30),
+          history:     genHistory(Number(ch.subscribers) || 1000, Number(ch.avgViews) || 500, 30),
           _fbId:       ch._fbId,
-          createdAt:   ch.createdAt?.toDate?.()?.toISOString?.()?.split('T')?.[0] || new Date().toISOString().split('T')[0]
-        };
-        channels.push(newCh);
-
-        // Сразу тянем свежие данные из API если они устарели или отсутствуют
-        const lastUpdate = ch.statsUpdatedAt?.toDate?.() || null;
-        const needsUpdate = !lastUpdate || (Date.now() - lastUpdate.getTime() > 4 * 60 * 60 * 1000);
-        if (needsUpdate && ch.username) {
-          syncChannelStats(ch._fbId, ch.username, newCh).then(ok => {
-            if (ok && state.page === 'home') updateChannelGrid();
-          });
-        }
+          createdAt:   (ch.createdAt?.toDate?.()?.toISOString?.() || new Date().toISOString()).split('T')[0]
+        });
       } else {
-        // Канал уже есть — проверяем нужно ли обновить статистику
-        const lastUpdate = ch.statsUpdatedAt?.toDate?.() || null;
-        const needsUpdate = !lastUpdate || (Date.now() - lastUpdate.getTime() > 4 * 60 * 60 * 1000);
-        if (needsUpdate && ch.username) {
-          syncChannelStats(ch._fbId, ch.username, exists);
-        }
+        // Обновляем из Firebase (там могут быть уже свежие данные)
+        if (ch.name)      exists.name      = ch.name;
+        if (ch.avatarUrl) exists.avatarUrl = ch.avatarUrl;
+        if (ch.subscribers) exists.subscribers = Number(ch.subscribers);
+        if (ch.avgViews)    exists.avgViews    = Number(ch.avgViews);
+        if (ch.verified !== undefined) exists.verified = ch.verified;
+      }
+      // Запрашиваем API если данные устарели (> 4 часов)
+      const lastUp = ch.statsUpdatedAt?.toDate?.() || null;
+      const stale  = !lastUp || (Date.now() - lastUp.getTime() > 4 * 60 * 60 * 1000);
+      const uname  = (ch.username || '').replace(/^@/, '');
+      if (stale && uname) {
+        syncOneChannel(ch._fbId, uname).then(ok => { if (ok) { if (state.page === 'home') updateChannelGrid(); } });
       }
     }
-
     if (state.page === 'home') updateChannelGrid();
-    scheduleStatsRefresh();
+    startAutoRefresh();
   } catch(e) {
-    console.warn('Не удалось загрузить одобренные каналы:', e);
+    console.warn('[MaxMetric] loadApprovedChannels:', e);
   }
 }
 
-// Автообновление статистики каждые 4 часа
-let _refreshTimer = null;
-function scheduleStatsRefresh() {
-  if (_refreshTimer) return; // уже запланировано
-  _refreshTimer = setTimeout(async () => {
-    _refreshTimer = null;
-    const fbChannels = channels.filter(c => c._fbId && c.username);
-    for (const ch of fbChannels) {
-      await syncChannelStats(ch._fbId, ch.username, ch);
+// Автообновление каждые 4 часа
+let _autoRefreshTimer = null;
+function startAutoRefresh() {
+  if (_autoRefreshTimer) return;
+  _autoRefreshTimer = setInterval(async () => {
+    for (const ch of channels.filter(c => c._fbId && c.username)) {
+      await syncOneChannel(ch._fbId, ch.username);
     }
     if (state.page === 'home') updateChannelGrid();
-    scheduleStatsRefresh(); // запланировать следующее обновление
-  }, 4 * 60 * 60 * 1000); // 4 часа
+  }, 4 * 60 * 60 * 1000);
+}
 }
 
 // Запускаем загрузку одобренных каналов при готовности Firebase
