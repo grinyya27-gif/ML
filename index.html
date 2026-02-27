@@ -1607,6 +1607,23 @@ async function handleAddSubmit(e) {
     statsUpdatedAt: null
   };
 
+  // Проверяем, нет ли уже такого канала среди одобренных
+  if (window._fbReady) {
+    try {
+      const approved = await window.fbLoadApproved();
+      const exists = approved.some(ch => (ch.username || '').replace(/^@/, '') === username);
+      if (exists) {
+        body.innerHTML = `<div class="success-state">
+          <div style="font-size:40px">ℹ️</div>
+          <div class="empty-title">Канал уже добавлен</div>
+          <div class="empty-desc">Канал с логином @${username} уже есть в каталоге. Если вы считаете, что это ошибка, напишите модератору.</div>
+          <button class="primary-btn" onclick="state.showModal=false;render()">Закрыть</button>
+        </div>`;
+        return;
+      }
+    } catch(_) {}
+  }
+
   // Показываем лоадер
   body.innerHTML = `<div class="success-state"><div style="font-size:40px">⏳</div><div class="empty-title">Отправляем заявку...</div></div>`;
 
