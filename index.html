@@ -2097,7 +2097,12 @@ function renderAdminList() {
       </div>
       <div class="admin-item-desc">${escHtml(s.description || '—')}</div>
       <div class="admin-item-meta">
-        <span class="admin-item-tag cat">${cat.icon} ${cat.name}</span>
+        <span class="admin-item-tag cat">
+          <select class="form-select" style="padding:4px 8px;font-size:11px;border-radius:999px;border:none;background:transparent"
+            onchange="adminChangeCategory('${s._fbId}', this.value)">
+            ${categories.filter(c=>c.id!=='all').map(c=>`<option value="${c.id}" ${c.id===s.category?'selected':''}>${c.icon} ${c.name}</option>`).join('')}
+          </select>
+        </span>
         <span class="admin-item-tag ${s.status}">${s.status === 'pending' ? '⏳ На рассмотрении' : s.status === 'approved' ? '✅ Одобрено' : '❌ Отклонено'}</span>
         ${s.contacts ? `<span class="admin-item-tag" style="background:var(--bg3);color:var(--text3)">📞 ${escHtml(s.contacts)}</span>` : ''}
       </div>
@@ -2139,6 +2144,21 @@ async function adminSetStatus(id, status) {
     }
   } catch(e) {
     alert('Ошибка: ' + e.message);
+  }
+}
+
+async function adminChangeCategory(id, categoryId) {
+  const item = adminSubmissions.find(s => s._fbId === id);
+  if (item) item.category = categoryId;
+  try {
+    if (!window._fbReady) {
+      await new Promise(res => window.addEventListener('fbReady', res, { once: true }));
+    }
+    // Обновляем категорию заявки в Firestore (используем общий апдейтер)
+    await window.fbUpdateChannelStats(id, { category: categoryId });
+    renderAdminList();
+  } catch(e) {
+    alert('Не удалось обновить категорию: ' + e.message);
   }
 }
 
